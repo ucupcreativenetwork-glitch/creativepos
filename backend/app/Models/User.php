@@ -31,6 +31,7 @@ class User extends Authenticatable
         'email',
         'phone',
         'password',
+        'must_change_password',
         'avatar_url',
         'outlet_id',
         'is_super_admin',
@@ -56,6 +57,7 @@ class User extends Authenticatable
             'last_login_at' => 'datetime',
             'password' => 'hashed',
             'is_super_admin' => 'boolean',
+            'must_change_password' => 'boolean',
             'two_factor_enabled' => 'boolean',
         ];
     }
@@ -83,6 +85,11 @@ class User extends Authenticatable
     public function requiresTwoFactor(): bool
     {
         return $this->two_factor_enabled && ! empty($this->two_factor_secret);
+    }
+
+    public function requiresPasswordChange(): bool
+    {
+        return (bool) $this->must_change_password;
     }
 
     public function getAllPermissionNames(): array

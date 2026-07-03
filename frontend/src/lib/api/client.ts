@@ -43,8 +43,14 @@ apiClient.interceptors.response.use(
     }
 
     if (error.response?.status === 403 && typeof window !== "undefined") {
-      const message = error.response?.data?.message ?? "";
-      if (message.includes("not available") || message.includes("tidak tersedia")) {
+      const payload = error.response?.data as { message?: string; code?: string } | undefined;
+      const message = payload?.message ?? "";
+
+      if (payload?.code === "PASSWORD_CHANGE_REQUIRED") {
+        if (!window.location.pathname.startsWith("/change-password")) {
+          window.location.href = "/change-password";
+        }
+      } else if (message.includes("not available") || message.includes("tidak tersedia")) {
         error.message =
           message ||
           "Fitur ini tidak tersedia di paket langganan Anda. Upgrade paket di Pengaturan.";

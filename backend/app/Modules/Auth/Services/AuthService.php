@@ -259,6 +259,26 @@ class AuthService
         return __($status);
     }
 
+    public function changePassword(User $user, string $currentPassword, string $newPassword): void
+    {
+        if (! Hash::check($currentPassword, $user->password)) {
+            throw ValidationException::withMessages([
+                'current_password' => ['Kata sandi saat ini tidak sesuai.'],
+            ]);
+        }
+
+        if (Hash::check($newPassword, $user->password)) {
+            throw ValidationException::withMessages([
+                'password' => ['Kata sandi baru harus berbeda dari kata sandi saat ini.'],
+            ]);
+        }
+
+        $user->forceFill([
+            'password' => $newPassword,
+            'must_change_password' => false,
+        ])->save();
+    }
+
     public function resetPassword(array $data): string
     {
         $status = Password::reset(
@@ -266,6 +286,7 @@ class AuthService
             function (User $user, string $password): void {
                 $user->forceFill([
                     'password' => $password,
+                    'must_change_password' => false,
                     'remember_token' => Str::random(60),
                 ])->save();
 

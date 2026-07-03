@@ -23,6 +23,8 @@ curl http://IP-SERVER/api/v1/health
 | Admin Toko | `admin@creativepos.local` | `Admin123!` | Operasional harian (Manager) |
 | Super Admin | `superadmin@creativepos.local` | `SuperAdmin123!` | Semua fitur + `/platform` |
 
+**Login pertama:** sistem meminta **ganti kata sandi default** sebelum akses penuh.
+
 Setelah login Admin → buka `/pos` → transaksi pertama.  
 Setelah login Super Admin → buka `/platform` untuk kelola tenant & APK.
 
@@ -1166,9 +1168,9 @@ docker compose -f docker-compose.client.yml exec -T backend \
 
 Katalog modul lengkap: [MODUL-DAN-FITUR.md](./MODUL-DAN-FITUR.md)
 
-### 14.1 Import produk baru (CSV — CLI)
+### 14.1 Import produk baru (CSV/Excel — Web & CLI)
 
-Untuk ratusan/ribuan SKU baru — gunakan skrip import CSV (terverifikasi, tidak lewat UI web).
+Untuk ratusan/ribuan SKU baru — gunakan **Inventori → Import Produk** di web, atau skrip CLI di server.
 
 #### Format CSV produk
 
@@ -1186,7 +1188,16 @@ Template: [`docs/templates/products-import.csv`](./templates/products-import.csv
 | `min_stock` | Tidak | 10 | Alert stok menipis |
 | `track_stock` | Tidak | 1 | `1`/`0` — lacak stok |
 
-#### Langkah import produk (server Linux)
+#### Via web (disarankan)
+
+1. Login → **Inventori** → **Import Produk**
+2. Unduh template CSV, isi di Excel
+3. Upload file `.csv` atau `.xlsx`
+4. Klik **Import Produk** — lihat ringkasan berhasil & error per baris
+
+Permission: `inventory.create` (Manager ke atas).
+
+#### Via CLI (server Linux)
 
 ```bash
 cd /opt/creativepos

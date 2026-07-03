@@ -18,6 +18,7 @@ class UserResource extends JsonResource
             'avatar_url' => $this->avatar_url,
             'status' => $this->status,
             'is_super_admin' => $this->is_super_admin,
+            'must_change_password' => (bool) $this->must_change_password,
             'two_factor_enabled' => $this->two_factor_enabled,
             'two_factor_method' => $this->two_factor_method,
             'email_verified_at' => $this->email_verified_at?->toIso8601String(),

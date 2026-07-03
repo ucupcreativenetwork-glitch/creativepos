@@ -21,7 +21,7 @@ Route::prefix('v1')->middleware('throttle:api')->group(function (): void {
     require app_path('Modules/Billing/Routes/webhooks.php');
 
     // Authenticated tenant routes (future modules)
-    Route::middleware(['auth:sanctum', 'tenant', 'subscription', 'setup-check'])->group(function (): void {
+    Route::middleware(['auth:sanctum', 'password-changed', 'tenant', 'subscription', 'setup-check'])->group(function (): void {
         // Idempotency: cegah transaksi POS duplikat dari double-click / retry
         Route::middleware(['idempotency'])->post(
             '/pos/transactions',
@@ -70,7 +70,7 @@ Route::prefix('v1')->middleware('throttle:api')->group(function (): void {
     });
 
     // Platform (Super Admin) routes
-    Route::middleware(['auth:sanctum', 'super-admin'])->prefix('platform')->group(function (): void {
+    Route::middleware(['auth:sanctum', 'password-changed', 'super-admin'])->prefix('platform')->group(function (): void {
         require app_path('Modules/Platform/Routes/api.php');
     });
 });

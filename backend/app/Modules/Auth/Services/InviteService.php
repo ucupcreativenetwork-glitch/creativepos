@@ -62,6 +62,7 @@ class InviteService
                 'name' => $data['name'] ?? $this->deriveNameFromEmail($data['email']),
                 'email' => $data['email'],
                 'password' => $temporaryPassword,
+                'must_change_password' => true,
                 'outlet_id' => $defaultOutlet?->id,
                 'status' => 'active',
             ]);

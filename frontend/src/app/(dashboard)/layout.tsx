@@ -1,25 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import {
-  BarChart3,
-  CalendarDays,
-  ChefHat,
-  Headphones,
-  History,
-  LayoutDashboard,
-  LogOut,
-  Package,
-  Settings,
-  Shield,
-  ShoppingCart,
-  Store,
-  Truck,
-  Users,
-} from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import { LogOut, Store } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils/cn";
 import { getInitials } from "@/lib/utils/format";
@@ -29,27 +14,7 @@ import { Button } from "@/components/ui/button";
 import { OnboardingGate } from "@/components/onboarding/onboarding-gate";
 import { MobileBottomNav } from "@/components/layout/mobile-bottom-nav";
 import { NotificationBell } from "@/components/notifications/notification-bell";
-import { usePackageFeatures } from "@/hooks/usePackageFeatures";
-
-const baseNavItems = [
-  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard, feature: null },
-  { href: "/pos", label: "POS", icon: ShoppingCart, feature: null },
-  { href: "/kitchen", label: "Dapur (KDS)", icon: ChefHat, feature: "order" },
-  { href: "/reservations", label: "Reservasi", icon: CalendarDays, feature: "reservation" },
-  { href: "/delivery", label: "Delivery", icon: Truck, feature: "delivery" },
-  { href: "/inventory", label: "Inventori", icon: Package, feature: null },
-  { href: "/members", label: "Member", icon: Users, feature: "loyalty" },
-  { href: "/crm", label: "CRM", icon: Headphones, feature: "crm" },
-  { href: "/reports", label: "Laporan", icon: BarChart3, feature: "report" },
-  { href: "/pos/history", label: "Riwayat POS", icon: History, feature: null },
-  { href: "/settings", label: "Pengaturan", icon: Settings, feature: null },
-];
-
-const platformNavItem = {
-  href: "/platform",
-  label: "Platform",
-  icon: Shield,
-};
+import { useDashboardNav } from "@/hooks/useDashboardNav";
 
 export default function DashboardLayout({
   children,
@@ -59,12 +24,15 @@ export default function DashboardLayout({
   const pathname = usePathname();
   const router = useRouter();
   const { user, tenant, clearAuth } = useAuthStore();
-  const { hasFeature } = usePackageFeatures();
+  const navItems = useDashboardNav();
+  const mustChangePassword = !!user?.must_change_password;
+  const isChangePasswordPage = pathname === "/change-password";
 
-  const navItems = (user?.is_super_admin
-    ? [...baseNavItems, { ...platformNavItem, feature: null }]
-    : baseNavItems
-  ).filter((item) => !item.feature || hasFeature(item.feature));
+  useEffect(() => {
+    if (mustChangePassword && !isChangePasswordPage) {
+      router.replace("/change-password");
+    }
+  }, [mustChangePassword, isChangePasswordPage, router]);
 
   const logoutMutation = useMutation({
     mutationFn: logout,
@@ -78,6 +46,18 @@ export default function DashboardLayout({
       router.push("/login");
     },
   });
+
+  if (mustChangePassword && !isChangePasswordPage) {
+    return null;
+  }
+
+  if (isChangePasswordPage) {
+    return (
+      <div className="min-h-screen bg-slate-50 p-4 md:p-6">
+        <main className="mx-auto max-w-3xl">{children}</main>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen bg-slate-50">

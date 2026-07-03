@@ -46,6 +46,7 @@ class DefaultAccountsSeeder extends Seeder
                 'name' => 'Super Admin',
                 'email' => $email,
                 'password' => Hash::make($password),
+                'must_change_password' => true,
                 'is_super_admin' => true,
                 'status' => 'active',
                 'email_verified_at' => now(),
@@ -55,6 +56,7 @@ class DefaultAccountsSeeder extends Seeder
                 'is_super_admin' => true,
                 'status' => 'active',
                 'password' => Hash::make($password),
+                'must_change_password' => true,
             ]);
         }
 
@@ -152,6 +154,7 @@ class DefaultAccountsSeeder extends Seeder
                 'name' => 'Admin Toko',
                 'phone' => '081234567890',
                 'password' => Hash::make($adminPassword),
+                'must_change_password' => true,
                 'outlet_id' => $outlet->id,
                 'is_super_admin' => false,
                 'status' => 'active',
@@ -161,6 +164,7 @@ class DefaultAccountsSeeder extends Seeder
 
         $admin->update([
             'password' => Hash::make($adminPassword),
+            'must_change_password' => true,
             'status' => 'active',
             'outlet_id' => $outlet->id,
             'is_super_admin' => false,

@@ -5,6 +5,7 @@ import type {
   CategoryPayload,
   PaginatedMeta,
   Product,
+  ProductImportResult,
   ProductPayload,
   ProductRecipeIngredient,
   ProductRecipeResponse,
@@ -52,6 +53,19 @@ export async function getProduct(uuid: string): Promise<Product> {
   const { data } = await apiClient.get<ApiResponse<Product>>(
     `/inventory/products/${uuid}`
   );
+  return data.data;
+}
+
+export async function importProducts(file: File): Promise<ProductImportResult> {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const { data } = await apiClient.post<ApiResponse<ProductImportResult>>(
+    "/inventory/products/import",
+    formData,
+    { headers: { "Content-Type": "multipart/form-data" } },
+  );
+
   return data.data;
 }
 

@@ -23,6 +23,7 @@ import {
   StockDialog,
   type StockAction,
 } from "@/components/inventory/stock-dialog";
+import { ProductImportDialog } from "@/components/inventory/product-import-dialog";
 import { StockImportDialog } from "@/components/inventory/stock-import-dialog";
 import { Button } from "@/components/ui/button";
 import {
@@ -43,6 +44,7 @@ import {
   getWarehouses,
 } from "@/lib/api/inventory";
 import { formatCurrency, formatDate } from "@/lib/utils/format";
+import { useAuthStore } from "@/stores/auth-store";
 import type { Product } from "@/types/inventory";
 
 type InventoryTab = "products" | "raw-materials" | "recipes";
@@ -59,7 +61,11 @@ export default function InventoryPage() {
   const [stockAction, setStockAction] = useState<StockAction>("in");
   const [stockProduct, setStockProduct] = useState<Product | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Product | null>(null);
-  const [importOpen, setImportOpen] = useState(false);
+  const [productImportOpen, setProductImportOpen] = useState(false);
+  const [stockImportOpen, setStockImportOpen] = useState(false);
+  const hasPermission = useAuthStore((s) => s.hasPermission);
+  const canImportProducts = hasPermission("inventory.create");
+  const canImportStock = hasPermission("inventory.stock.adjust");
 
   const { data: categoriesData } = useQuery({
     queryKey: ["inventory", "categories"],
@@ -132,19 +138,35 @@ export default function InventoryPage() {
         </div>
         {activeTab === "products" && (
           <div className="flex flex-wrap gap-2">
-            <Button variant="outline" onClick={() => setImportOpen(true)}>
-              <Upload className="h-4 w-4" />
-              Import Stok
-            </Button>
-            <Button
-              onClick={() => {
-                setEditingProduct(null);
-                setFormOpen(true);
-              }}
-            >
-              <Plus className="h-4 w-4" />
-              Tambah Produk
-            </Button>
+            {canImportProducts && (
+              <Button
+                variant="outline"
+                onClick={() => setProductImportOpen(true)}
+              >
+                <Upload className="h-4 w-4" />
+                Import Produk
+              </Button>
+            )}
+            {canImportStock && (
+              <Button
+                variant="outline"
+                onClick={() => setStockImportOpen(true)}
+              >
+                <Upload className="h-4 w-4" />
+                Import Stok
+              </Button>
+            )}
+            {canImportProducts && (
+              <Button
+                onClick={() => {
+                  setEditingProduct(null);
+                  setFormOpen(true);
+                }}
+              >
+                <Plus className="h-4 w-4" />
+                Tambah Produk
+              </Button>
+            )}
           </div>
         )}
       </div>
@@ -472,10 +494,16 @@ export default function InventoryPage() {
         onSuccess={refresh}
       />
 
+      <ProductImportDialog
+        open={productImportOpen}
+        onClose={() => setProductImportOpen(false)}
+        onSuccess={refresh}
+      />
+
       <StockImportDialog
-        open={importOpen}
+        open={stockImportOpen}
         warehouses={warehouses}
-        onClose={() => setImportOpen(false)}
+        onClose={() => setStockImportOpen(false)}
         onSuccess={refresh}
       />
 

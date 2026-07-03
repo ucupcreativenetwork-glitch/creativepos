@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/card";
 import { login2fa } from "@/lib/api/auth";
 import { getErrorMessage } from "@/lib/api/client";
+import { getPostLoginPath } from "@/lib/auth/post-login-redirect";
 import { useAuthStore } from "@/stores/auth-store";
 
 const twoFactorSchema = z.object({
@@ -63,7 +64,7 @@ export default function TwoFactorPage() {
         token: data.token,
       });
       toast.success("Verifikasi berhasil!");
-      router.push("/dashboard");
+      router.push(getPostLoginPath(data.user, data.permissions));
     },
     onError: (error) => {
       toast.error(getErrorMessage(error));

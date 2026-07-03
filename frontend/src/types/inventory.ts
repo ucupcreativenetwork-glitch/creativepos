@@ -149,6 +149,12 @@ export interface StockImportResult {
   errors: string[];
 }
 
+export interface ProductImportResult {
+  created: number;
+  skipped: number;
+  errors: string[];
+}
+
 export interface RawMaterialPayload {
   name: string;
   unit: RawMaterialUnit;

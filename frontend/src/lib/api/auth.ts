@@ -3,6 +3,7 @@ import { setToken, removeToken } from "@/lib/utils/token";
 import type {
   ApiResponse,
   AuthResponse,
+  ChangePasswordPayload,
   ForgotPasswordPayload,
   LoginPayload,
   MeResponse,
@@ -11,6 +12,7 @@ import type {
   RegisterPayload,
   ResetPasswordPayload,
   TwoFactorPayload,
+  User,
 } from "@/types/auth";
 
 export async function register(
@@ -87,6 +89,17 @@ export async function verifyOtp(
 
 export async function getMe(): Promise<MeResponse> {
   const { data } = await apiClient.get<ApiResponse<MeResponse>>("/auth/me");
+  return data.data;
+}
+
+export async function changePassword(
+  payload: ChangePasswordPayload,
+): Promise<User> {
+  const { data } = await apiClient.post<ApiResponse<User>>(
+    "/auth/change-password",
+    payload,
+  );
+
   return data.data;
 }
 

@@ -5,8 +5,15 @@ export interface User {
   phone?: string;
   roles: string[];
   is_super_admin?: boolean;
+  must_change_password?: boolean;
   email_verified_at?: string | null;
   created_at?: string;
+}
+
+export interface ChangePasswordPayload {
+  current_password: string;
+  password: string;
+  password_confirmation: string;
 }
 
 export interface Tenant {

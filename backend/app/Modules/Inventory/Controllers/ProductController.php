@@ -4,9 +4,11 @@ namespace App\Modules\Inventory\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Modules\Inventory\Models\Product;
+use App\Modules\Inventory\Requests\ProductImportRequest;
 use App\Modules\Inventory\Requests\StoreProductRequest;
 use App\Modules\Inventory\Requests\UpdateProductRequest;
 use App\Modules\Inventory\Resources\ProductResource;
+use App\Modules\Inventory\Services\ProductImportService;
 use App\Modules\Inventory\Services\ProductService;
 use App\Shared\Responses\ApiResponse;
 use Illuminate\Http\JsonResponse;
@@ -16,6 +18,7 @@ class ProductController extends Controller
 {
     public function __construct(
         private readonly ProductService $productService,
+        private readonly ProductImportService $productImportService,
     ) {}
 
     public function index(Request $request): JsonResponse
@@ -88,6 +91,20 @@ class ProductController extends Controller
         $this->productService->delete($product);
 
         return ApiResponse::success(null, 'Produk berhasil dihapus.');
+    }
+
+    public function import(ProductImportRequest $request): JsonResponse
+    {
+        $this->authorizePermission($request, 'inventory.create');
+
+        $result = $this->productImportService->importFromFile(
+            $request->file('file'),
+            $request->user()?->id,
+        );
+
+        $message = "Import produk selesai: {$result['created']} berhasil, {$result['skipped']} dilewati.";
+
+        return ApiResponse::success($result, $message);
     }
 
     protected function authorizePermission(Request $request, string $permission): void

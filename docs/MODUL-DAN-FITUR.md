@@ -74,7 +74,9 @@ Role bawaan: `super-admin`, `owner`, `manager`, `supervisor`, `cashier`, `waiter
 | `tenant.settings.*` / `tenant.users.*` / `tenant.outlets.manage` | Pengaturan bisnis |
 | `platform.*` | Panel platform (super admin) |
 
-**Catatan:** Web memfilter menu berdasarkan **paket fitur** (+ super admin). API memvalidasi **permission** per aksi.
+**Catatan:** Web memfilter menu berdasarkan **paket fitur** dan **permission RBAC** (+ super admin bypass). API memvalidasi **permission** per aksi.
+
+**Keamanan login:** akun default & staff yang diundang wajib **ganti kata sandi** saat login pertama (`/change-password`).
 
 ---
 
@@ -104,7 +106,7 @@ Role bawaan: `super-admin`, `owner`, `manager`, `supervisor`, `cashier`, `waiter
 | `/kitchen` | KDS Dapur | `order` | Antrian dapur kanban, update status |
 | `/reservations` | Reservasi | `reservation` | Daftar, kalender, buat/edit, slot waktu |
 | `/delivery` | Delivery | `delivery` | Kanban order, assign driver, zona, biaya |
-| `/inventory` | Inventori | Selalu | Produk, bahan baku, resep/COGS, alert stok, stok in/out/adjust, **import stok CSV/Excel** |
+| `/inventory` | Inventori | Selalu | Produk, bahan baku, resep/COGS, alert stok, stok in/out/adjust, **import produk & stok CSV/Excel** |
 | `/members` | Member | `loyalty` | CRUD member, tier, poin, topup/withdraw/transfer wallet |
 | `/crm` | CRM | `crm` | Tiket, assign, balas, FAQ, konfigurasi WhatsApp |
 | `/reports` | Laporan | `report` | Penjualan, produk, inventori, member; P&L & arus kas (paket penuh); export |
@@ -226,7 +228,7 @@ Format import stok — template: [`templates/stock-import.csv`](./templates/stoc
 | Inventori bahan baku | ✅ | ❌ | Tab web only |
 | Resep / COGS | ✅ | ❌ | Tab web only |
 | Import stok massal | ✅ | ❌ | Web: Inventori → Import Stok |
-| Import produk massal (CLI) | ✅ | ❌ | Skrip server, bukan UI |
+| Import produk massal | ✅ | ❌ | Web: Inventori → Import Produk |
 | Kitchen KDS | ✅ | ❌ | `/kitchen` web only |
 | QR Menu tamu | ✅ | ❌ | Halaman publik web |
 | QR Menu staff | Pengaturan | ✅ | Tab di hub Member |

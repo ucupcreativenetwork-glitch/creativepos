@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/card";
 import { login } from "@/lib/api/auth";
 import { getErrorMessage } from "@/lib/api/client";
+import { getPostLoginPath } from "@/lib/auth/post-login-redirect";
 import { useAuthStore } from "@/stores/auth-store";
 
 const loginSchema = z.object({
@@ -66,7 +67,7 @@ export function LoginForm() {
         token: data.token,
       });
       toast.success(`Selamat datang, ${data.user.name}!`);
-      router.push(redirect);
+      router.push(getPostLoginPath(data.user, data.permissions, redirect));
     },
     onError: (error) => {
       toast.error(getErrorMessage(error));

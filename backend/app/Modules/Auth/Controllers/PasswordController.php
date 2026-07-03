@@ -3,6 +3,7 @@
 namespace App\Modules\Auth\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Modules\Auth\Resources\UserResource;
 use App\Modules\Auth\Services\AuthService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -44,5 +45,25 @@ class PasswordController extends Controller
         ));
 
         return $this->success(null, 'Password has been reset successfully.');
+    }
+
+    public function changePassword(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'current_password' => ['required', 'string'],
+            'password' => ['required', 'string', 'confirmed', Password::min(8)->mixedCase()->numbers()],
+        ]);
+
+        $user = $request->user();
+        $this->authService->changePassword(
+            $user,
+            $validated['current_password'],
+            $validated['password'],
+        );
+
+        return $this->success(
+            new UserResource($user->fresh()),
+            'Kata sandi berhasil diperbarui.',
+        );
     }
 }

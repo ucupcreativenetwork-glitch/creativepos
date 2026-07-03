@@ -22,6 +22,7 @@ interface AuthState {
   clearAuth: () => void;
   setLoading: (loading: boolean) => void;
   hasPermission: (permission: string) => boolean;
+  updateUser: (user: Partial<User>) => void;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -72,6 +73,12 @@ export const useAuthStore = create<AuthState>()(
         const { permissions, user } = get();
         if (user?.is_super_admin) return true;
         return permissions.includes(permission);
+      },
+
+      updateUser: (patch) => {
+        const current = get().user;
+        if (!current) return;
+        set({ user: { ...current, ...patch } });
       },
     }),
     {

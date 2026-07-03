@@ -29,6 +29,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'super-admin' => \App\Shared\Middleware\EnsureSuperAdmin::class,
             'idempotency' => \App\Shared\Middleware\IdempotencyMiddleware::class,
             'setup-check' => \App\Shared\Middleware\CheckSetupCompleted::class,
+            'password-changed' => \App\Shared\Middleware\EnsurePasswordChanged::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
