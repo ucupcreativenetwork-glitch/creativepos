@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#0f172a" />
+    <title>CreativePOS</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <div class="brand">
+        <div class="logo">CP</div>
+        <h1>CreativePOS</h1>
+        <p>Hubungkan ke server toko Anda</p>
+      </div>
+
+      <section id="loading" class="panel hidden">
+        <p class="muted">Memuat...</p>
+      </section>
+
+      <section id="setup" class="panel">
+        <label for="serverUrl">Alamat Server</label>
+        <input
+          id="serverUrl"
+          type="url"
+          inputmode="url"
+          placeholder="http://192.168.1.50"
+          autocomplete="off"
+        />
+        <p class="hint">
+          Masukkan IP atau hostname server tempat CreativePOS terinstall.
+        </p>
+        <button id="connectBtn" type="button">Hubungkan & Buka POS</button>
+        <p id="error" class="error hidden"></p>
+      </section>
+    </main>
+    <script src="app.js"></script>
+  </body>
+</html>

@@ -1,0 +1,28 @@
+{
+  "name": "creativepos-mobile",
+  "version": "1.0.0",
+  "private": true,
+  "description": "CreativePOS Android app (Capacitor wrapper)",
+  "scripts": {
+    "cap:sync": "cap sync android",
+    "android:open": "cap open android",
+    "android:build": "cd android && gradlew.bat assembleRelease",
+    "android:build:unix": "cd android && ./gradlew assembleRelease"
+  },
+  "dependencies": {
+    "@capacitor/android": "^7.2.0",
+    "@capacitor/core": "^7.2.0",
+    "@capacitor/preferences": "^7.0.1",
+    "@capacitor/splash-screen": "^7.0.1",
+    "@capacitor/status-bar": "^7.0.1"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^7.2.0",
+    "typescript": "^5.8.2"
+  },
+  "capacitor": {
+    "platforms": [
+      "android"
+    ]
+  }
+}
