@@ -71,7 +71,12 @@ export function LoginForm() {
         token: data.token,
       });
       toast.success(`Selamat datang, ${data.user.name}!`);
-      router.push(getPostLoginPath(data.user, data.permissions, redirect));
+      // Full page load so middleware receives the encoded auth cookie.
+      window.location.href = getPostLoginPath(
+        data.user,
+        data.permissions,
+        redirect,
+      );
     },
     onError: (error) => {
       toast.error(getErrorMessage(error));

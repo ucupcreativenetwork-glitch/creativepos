@@ -64,7 +64,7 @@ export default function TwoFactorPage() {
         token: data.token,
       });
       toast.success("Verifikasi berhasil!");
-      router.push(getPostLoginPath(data.user, data.permissions));
+      window.location.href = getPostLoginPath(data.user, data.permissions);
     },
     onError: (error) => {
       toast.error(getErrorMessage(error));

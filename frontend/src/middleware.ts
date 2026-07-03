@@ -18,12 +18,20 @@ const AUTH_ROUTES = [
   "/two-factor",
 ];
 
+function readAuthToken(request: NextRequest): string | undefined {
+  const rawToken = request.cookies.get("auth_token")?.value;
+  if (!rawToken) return undefined;
+
+  try {
+    return decodeURIComponent(rawToken);
+  } catch {
+    return rawToken;
+  }
+}
+
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const rawToken = request.cookies.get("auth_token")?.value;
-  const token = rawToken
-    ? decodeURIComponent(rawToken)
-    : undefined;
+  const token = readAuthToken(request);
 
   const isPublicRoute = PUBLIC_ROUTES.some(
     (route) => pathname === route || pathname.startsWith(`${route}/`)
