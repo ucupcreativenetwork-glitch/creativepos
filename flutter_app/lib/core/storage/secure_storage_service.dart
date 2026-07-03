@@ -13,19 +13,48 @@ class SecureStorageService {
       : _storage = storage ??
             const FlutterSecureStorage(
               aOptions: AndroidOptions(encryptedSharedPreferences: true),
-            );
+            ),
+        _memory = null;
 
-  final FlutterSecureStorage _storage;
+  SecureStorageService.memory({Map<String, String>? initial})
+      : _storage = null,
+        _memory = Map<String, String>.from(initial ?? {});
 
-  Future<void> write(String key, String value) => _storage.write(key: key, value: value);
+  final FlutterSecureStorage? _storage;
+  final Map<String, String>? _memory;
 
-  Future<String?> read(String key) => _storage.read(key: key);
-
-  Future<void> delete(String key) => _storage.delete(key: key);
-
-  Future<void> clearSession() async {
-    await _storage.delete(key: StorageKeys.authToken);
+  Future<void> write(String key, String value) async {
+    if (_memory != null) {
+      _memory![key] = value;
+      return;
+    }
+    await _storage!.write(key: key, value: value);
   }
 
-  Future<void> clearAll() => _storage.deleteAll();
+  Future<String?> read(String key) async {
+    if (_memory != null) {
+      return _memory![key];
+    }
+    return _storage!.read(key: key);
+  }
+
+  Future<void> delete(String key) async {
+    if (_memory != null) {
+      _memory!.remove(key);
+      return;
+    }
+    await _storage!.delete(key: key);
+  }
+
+  Future<void> clearSession() async {
+    await delete(StorageKeys.authToken);
+  }
+
+  Future<void> clearAll() async {
+    if (_memory != null) {
+      _memory!.clear();
+      return;
+    }
+    await _storage!.deleteAll();
+  }
 }

@@ -32,8 +32,21 @@ abstract class DatabaseTestCase extends TestCase
 
     protected function setUp(): void
     {
+        $this->clearCachedBootstrapFiles();
         parent::setUp();
         $this->seedCoreData();
+    }
+
+    protected function clearCachedBootstrapFiles(): void
+    {
+        $cacheDir = dirname(__DIR__).'/bootstrap/cache';
+
+        foreach (['config.php', 'routes-v7.php', 'services.php'] as $file) {
+            $path = $cacheDir.'/'.$file;
+            if (is_file($path)) {
+                @unlink($path);
+            }
+        }
     }
 
     protected function seedCoreData(): void

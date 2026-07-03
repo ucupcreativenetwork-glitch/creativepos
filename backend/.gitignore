@@ -1,4 +1,7 @@
 /.phpunit.cache
+/bootstrap/cache/config.php
+/bootstrap/cache/routes-v7.php
+/bootstrap/cache/services.php
 /node_modules
 /public/build
 /public/hot
