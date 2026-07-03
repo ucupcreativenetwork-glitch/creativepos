@@ -2,7 +2,7 @@ import type { User } from "@/types/auth";
 
 const LANDING_BY_PERMISSION: Array<{ permission: string; path: string }> = [
   { permission: "dashboard.view", path: "/dashboard" },
-  { permission: "pos.create", path: "/pos" },
+  { permission: "pos.create", path: "/kasir" },
   { permission: "kitchen.view", path: "/kitchen" },
   { permission: "inventory.view", path: "/inventory" },
   { permission: "loyalty.view", path: "/members" },

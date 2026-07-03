@@ -37,7 +37,8 @@ export function middleware(request: NextRequest) {
     pathname.startsWith("/pos") ||
     pathname.startsWith("/kitchen") ||
     pathname.startsWith("/reservations") ||
-    pathname.startsWith("/delivery");
+    pathname.startsWith("/delivery") ||
+    pathname.startsWith("/kasir");
 
   if (token && isAuthRoute) {
     return NextResponse.redirect(new URL("/dashboard", request.url));
@@ -62,6 +63,7 @@ export function middleware(request: NextRequest) {
       "/reservations",
       "/delivery",
       "/platform",
+      "/kasir",
     ];
     if (protectedPrefixes.some((prefix) => pathname.startsWith(prefix))) {
       const loginUrl = new URL("/login", request.url);

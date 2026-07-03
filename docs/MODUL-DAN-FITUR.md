@@ -94,14 +94,15 @@ Role bawaan: `super-admin`, `owner`, `manager`, `supervisor`, `cashier`, `waiter
 | `/menu/{tenant}/{outlet}` | QR Menu tamu |
 | `/menu/.../table/[token]` | QR Menu per meja |
 | `/menu/track/[uuid]` | Lacak pesanan tamu |
-| `/offline` | Fallback offline → redirect POS |
+| `/offline` | Fallback offline → redirect mesin kasir |
 
 ### Dashboard (setelah login)
 
 | Route | Modul | Paket | Fitur utama |
 |-------|-------|-------|-------------|
 | `/dashboard` | Dashboard | Selalu | KPI, grafik penjualan/produk/pelanggan, live feed, checklist setup |
-| `/pos` | POS | Selalu | Katalog, keranjang, modifier, barcode, shift, hold bill, pembayaran, member/poin, offline cache |
+| `/kasir` | Mesin Kasir | Selalu | UI fullscreen tablet/mesin POS klasik: tombol produk besar, total besar, tanpa sidebar; shift, hold, offline, barcode |
+| `/pos` | POS Admin | Selalu | Katalog, keranjang, modifier, barcode, shift, hold bill, pembayaran, member/poin, offline cache; link ke `/kasir` |
 | `/pos/history` | Riwayat POS | Selalu | Daftar transaksi, void |
 | `/kitchen` | KDS Dapur | `order` | Antrian dapur kanban, update status |
 | `/reservations` | Reservasi | `reservation` | Daftar, kalender, buat/edit, slot waktu |
@@ -308,6 +309,7 @@ docker compose -f docker-compose.client.yml exec -T backend \
 | Route | Label menu |
 |-------|------------|
 | `/dashboard` | Dashboard |
+| `/kasir` | Mesin Kasir (tablet/PWA) |
 | `/pos` | POS |
 | `/pos/history` | Riwayat |
 | `/kitchen` | Dapur |

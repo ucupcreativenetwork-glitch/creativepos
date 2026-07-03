@@ -2,9 +2,9 @@
   "name": "CreativePOS",
   "short_name": "CreativePOS",
   "description": "Point of Sale untuk bisnis F&B dan retail",
-  "start_url": "/pos",
+  "start_url": "/kasir",
   "display": "standalone",
-  "background_color": "#ffffff",
+  "background_color": "#020617",
   "theme_color": "#0f172a",
   "orientation": "any",
   "icons": [
@@ -19,6 +19,22 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Mesin Kasir",
+      "short_name": "Kasir",
+      "description": "Mode kasir fullscreen untuk tablet dan mesin POS",
+      "url": "/kasir",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "POS Admin",
+      "short_name": "POS",
+      "description": "POS dengan navigasi lengkap",
+      "url": "/pos",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
     }
   ]
 }
