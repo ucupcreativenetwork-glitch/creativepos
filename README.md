@@ -80,7 +80,7 @@ cd /opt/creativepos && sudo bash update.sh
 | Daftar akun | `http://IP-SERVER/register` |
 | APK mobile | `http://IP-SERVER/api/v1/mobile/version?platform=android` |
 
-Panduan lengkap: [docs/CLIENT-INSTALL.md](docs/CLIENT-INSTALL.md)
+Panduan lengkap: [docs/CLIENT-INSTALL.md](docs/CLIENT-INSTALL.md) · [docs/TUTORIAL-LENGKAP.md](docs/TUTORIAL-LENGKAP.md) (setup → aktif → fitur → payment gateway)
 
 **Repo private:** set `GITHUB_TOKEN` (PAT dengan scope `repo`) sebelum `git clone`.
 
