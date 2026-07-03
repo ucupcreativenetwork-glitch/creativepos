@@ -140,6 +140,32 @@ class AuthRepository {
 
   Future<AuthSession?> restoreSessionFromCache() => _cache.loadSession();
 
+  Future<UserModel> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    final user = await _api.changePassword(
+      currentPassword: currentPassword,
+      password: newPassword,
+      passwordConfirmation: newPassword,
+    );
+
+    final token = await getToken();
+    final cached = await _cache.loadSession();
+    if (token != null && cached != null) {
+      await _cache.saveSession(
+        AuthSession(
+          token: token,
+          user: user,
+          tenant: cached.tenant,
+          permissions: cached.permissions,
+        ),
+      );
+    }
+
+    return user;
+  }
+
   Future<void> logout() async {
     try {
       await _api.logout();

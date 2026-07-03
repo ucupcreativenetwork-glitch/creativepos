@@ -169,6 +169,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       context.go('/two-factor');
       return;
     }
+    if (ok && status == AuthStatus.needsPasswordChange) {
+      context.go('/change-password');
+      return;
+    }
     if (ok && status == AuthStatus.authenticated) {
       if (_biometricAvailable && !_biometricEnabled) {
         final enable = await showDialog<bool>(

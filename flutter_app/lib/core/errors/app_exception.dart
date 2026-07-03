@@ -32,3 +32,9 @@ final class FeatureNotAvailableException extends AppException {
     super.message = 'Fitur ini tidak tersedia di paket langganan Anda',
   ]);
 }
+
+final class PasswordChangeRequiredException extends AppException {
+  const PasswordChangeRequiredException([
+    super.message = 'Anda harus mengganti kata sandi terlebih dahulu.',
+  ]);
+}

@@ -46,6 +46,7 @@ enum AuthStatus {
   needsServer,
   needs2fa,
   needsBiometric,
+  needsPasswordChange,
   authenticated,
   standalone,
 }
@@ -148,12 +149,15 @@ class AuthController extends StateNotifier<AuthState> {
       final session = await _repo.restoreSession(preferCache: !serverUp);
       if (session != null) {
         _ref.read(authTokenProvider.notifier).state = session.token;
+        final nextStatus = _statusForSession(session);
         state = state.copyWith(
-          status: AuthStatus.authenticated,
+          status: nextStatus,
           session: session,
           isLoading: false,
         );
-        unawaited(_warmOfflineCache());
+        if (nextStatus == AuthStatus.authenticated) {
+          unawaited(_warmOfflineCache());
+        }
         return;
       }
 
@@ -216,12 +220,15 @@ class AuthController extends StateNotifier<AuthState> {
       }
 
       _ref.read(authTokenProvider.notifier).state = session.token;
+      final nextStatus = _statusForSession(session);
       state = state.copyWith(
-        status: AuthStatus.authenticated,
+        status: nextStatus,
         session: session,
         isLoading: false,
       );
-      unawaited(_warmOfflineCache());
+      if (nextStatus == AuthStatus.authenticated) {
+        unawaited(_warmOfflineCache());
+      }
       return true;
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());
@@ -254,14 +261,17 @@ class AuthController extends StateNotifier<AuthState> {
       }
 
       _ref.read(authTokenProvider.notifier).state = session.token;
+      final nextStatus = _statusForSession(session);
       state = state.copyWith(
-        status: AuthStatus.authenticated,
+        status: nextStatus,
         session: session,
         isLoading: false,
       );
 
-      unawaited(_refreshSessionInBackground());
-      unawaited(_warmOfflineCache());
+      if (nextStatus == AuthStatus.authenticated) {
+        unawaited(_refreshSessionInBackground());
+        unawaited(_warmOfflineCache());
+      }
       return true;
     } catch (e) {
       state = state.copyWith(
@@ -297,9 +307,46 @@ class AuthController extends StateNotifier<AuthState> {
         code: code,
       );
       _ref.read(authTokenProvider.notifier).state = session.token;
+      final nextStatus = _statusForSession(session);
+      state = state.copyWith(
+        status: nextStatus,
+        session: session,
+        isLoading: false,
+      );
+      if (nextStatus == AuthStatus.authenticated) {
+        unawaited(_warmOfflineCache());
+      }
+      return true;
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: e.toString());
+      return false;
+    }
+  }
+
+  Future<bool> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    state = state.copyWith(isLoading: true, error: null);
+    try {
+      final user = await _repo.changePassword(
+        currentPassword: currentPassword,
+        newPassword: newPassword,
+      );
+      final session = state.session;
+      if (session == null) {
+        state = state.copyWith(isLoading: false, error: 'Sesi tidak ditemukan');
+        return false;
+      }
+      final updated = AuthSession(
+        token: session.token,
+        user: user,
+        tenant: session.tenant,
+        permissions: session.permissions,
+      );
       state = state.copyWith(
         status: AuthStatus.authenticated,
-        session: session,
+        session: updated,
         isLoading: false,
       );
       unawaited(_warmOfflineCache());
@@ -308,6 +355,29 @@ class AuthController extends StateNotifier<AuthState> {
       state = state.copyWith(isLoading: false, error: e.toString());
       return false;
     }
+  }
+
+  void requirePasswordChange() {
+    final session = state.session;
+    if (session == null) return;
+    state = state.copyWith(
+      status: AuthStatus.needsPasswordChange,
+      session: AuthSession(
+        token: session.token,
+        user: session.user.copyWith(mustChangePassword: true),
+        tenant: session.tenant,
+        permissions: session.permissions,
+        requires2fa: session.requires2fa,
+        pendingToken: session.pendingToken,
+        twoFactorMethod: session.twoFactorMethod,
+      ),
+    );
+  }
+
+  AuthStatus _statusForSession(AuthSession session) {
+    return session.user.mustChangePassword
+        ? AuthStatus.needsPasswordChange
+        : AuthStatus.authenticated;
   }
 
   Future<void> _warmOfflineCache() async {

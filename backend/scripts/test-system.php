@@ -280,6 +280,14 @@ if ($code === 200 && $saToken) {
     }
 }
 
+if ($adminToken && $mustChange && isset($newPassword) && $newPassword !== $adminPassword) {
+    request('POST', '/auth/change-password', [
+        'current_password' => $newPassword,
+        'password' => $adminPassword,
+        'password_confirmation' => $adminPassword,
+    ], $adminToken, $adminTenantId);
+}
+
 section('Ringkasan');
 $total = $passed + $failed + $skipped;
 echo "\nTotal: {$total} | PASS: {$passed} | FAIL: {$failed} | SKIP: {$skipped}\n";

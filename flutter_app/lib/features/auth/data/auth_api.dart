@@ -60,6 +60,26 @@ class AuthApi {
     return response.data!;
   }
 
+  Future<UserModel> changePassword({
+    required String currentPassword,
+    required String password,
+    required String passwordConfirmation,
+  }) async {
+    final response = await _dio.postApi<UserModel>(
+      ApiPaths.changePassword,
+      data: {
+        'current_password': currentPassword,
+        'password': password,
+        'password_confirmation': passwordConfirmation,
+      },
+      parser: (data) => UserModel.fromJson(data as Map<String, dynamic>),
+    );
+    if (!response.success || response.data == null) {
+      throw Exception(response.message);
+    }
+    return response.data!;
+  }
+
   Future<void> logout() async {
     await _dio.postApi(ApiPaths.logout);
   }

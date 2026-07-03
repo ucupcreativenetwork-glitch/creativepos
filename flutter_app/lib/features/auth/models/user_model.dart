@@ -10,6 +10,7 @@ class UserModel {
     this.avatarUrl,
     this.status = 'active',
     this.roles = const [],
+    this.mustChangePassword = false,
   });
 
   final int id;
@@ -20,6 +21,21 @@ class UserModel {
   final String? avatarUrl;
   final String status;
   final List<String> roles;
+  final bool mustChangePassword;
+
+  UserModel copyWith({bool? mustChangePassword}) {
+    return UserModel(
+      id: id,
+      uuid: uuid,
+      name: name,
+      email: email,
+      phone: phone,
+      avatarUrl: avatarUrl,
+      status: status,
+      roles: roles,
+      mustChangePassword: mustChangePassword ?? this.mustChangePassword,
+    );
+  }
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
@@ -34,6 +50,7 @@ class UserModel {
               ?.map((e) => e.toString())
               .toList() ??
           const [],
+      mustChangePassword: json['must_change_password'] == true,
     );
   }
 }

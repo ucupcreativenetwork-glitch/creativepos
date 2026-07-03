@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/auth/providers/auth_providers.dart';
+import '../../features/auth/views/change_password_screen.dart';
 import '../../features/auth/views/login_screen.dart';
 import '../../features/auth/views/server_setup_screen.dart';
 import '../../features/auth/views/two_factor_screen.dart';
@@ -35,7 +36,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       final isAuthRoute = loc == '/login' ||
           loc == '/server-setup' ||
           loc == '/standalone-setup' ||
-          loc == '/two-factor';
+          loc == '/two-factor' ||
+          loc == '/change-password';
 
       if (auth.status == AuthStatus.unknown || auth.isLoading) {
         return null;
@@ -66,6 +68,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         return '/two-factor';
       }
 
+      if (auth.status == AuthStatus.needsPasswordChange &&
+          loc != '/change-password') {
+        return '/change-password';
+      }
+
       if (auth.status == AuthStatus.authenticated && isAuthRoute) {
         return '/dashboard';
       }
@@ -88,6 +95,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/two-factor',
         builder: (_, __) => const TwoFactorScreen(),
+      ),
+      GoRoute(
+        path: '/change-password',
+        builder: (_, __) => const ChangePasswordScreen(),
       ),
       GoRoute(
         path: '/operations',

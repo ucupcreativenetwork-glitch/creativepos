@@ -26,7 +26,13 @@ class _TwoFactorScreenState extends ConsumerState<TwoFactorScreen> {
         .read(authControllerProvider.notifier)
         .verifyTwoFactor(_codeController.text.trim());
     if (!mounted) return;
-    if (ok) context.go('/dashboard');
+    if (!ok) return;
+    final status = ref.read(authControllerProvider).status;
+    if (status == AuthStatus.needsPasswordChange) {
+      context.go('/change-password');
+      return;
+    }
+    context.go('/dashboard');
   }
 
   @override

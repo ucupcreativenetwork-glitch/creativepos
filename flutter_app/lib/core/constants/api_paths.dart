@@ -9,6 +9,7 @@ abstract final class ApiPaths {
   static const login2fa = '/auth/login/2fa';
   static const logout = '/auth/logout';
   static const me = '/auth/me';
+  static const changePassword = '/auth/change-password';
   static const otpEmail = '/auth/otp/email';
   static const otpWhatsapp = '/auth/otp/whatsapp';
   static const otpVerify = '/auth/otp/verify';

@@ -44,10 +44,23 @@ class ApiInterceptor extends Interceptor {
 
     if (response?.statusCode == 403) {
       final data = response?.data;
+      final code = data is Map ? data['code']?.toString() : null;
       final message = data is Map
           ? data['message']?.toString() ??
               'Fitur ini tidak tersedia di paket langganan Anda'
           : 'Akses ditolak';
+
+      if (code == 'PASSWORD_CHANGE_REQUIRED') {
+        _ref.read(authControllerProvider.notifier).requirePasswordChange();
+        handler.reject(
+          DioException(
+            requestOptions: err.requestOptions,
+            error: PasswordChangeRequiredException(message),
+          ),
+        );
+        return;
+      }
+
       handler.reject(
         DioException(
           requestOptions: err.requestOptions,

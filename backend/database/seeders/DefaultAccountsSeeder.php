@@ -30,6 +30,16 @@ class DefaultAccountsSeeder extends Seeder
         $this->seedDemoTenantWithAdmin();
     }
 
+    protected function requiresPasswordChange(): bool
+    {
+        $forced = env('CREATIVEPOS_FORCE_PASSWORD_CHANGE');
+        if ($forced !== null && $forced !== '') {
+            return filter_var($forced, FILTER_VALIDATE_BOOLEAN);
+        }
+
+        return ! app()->environment('local', 'testing');
+    }
+
     protected function seedSuperAdmin(): void
     {
         $email = strtolower(env('CREATIVEPOS_SUPER_ADMIN_EMAIL', 'superadmin@creativepos.local'));
@@ -47,7 +57,7 @@ class DefaultAccountsSeeder extends Seeder
                 'name' => 'Super Admin',
                 'email' => $email,
                 'password' => Hash::make($password),
-                'must_change_password' => true,
+                'must_change_password' => $this->requiresPasswordChange(),
                 'is_super_admin' => true,
                 'status' => 'active',
                 'email_verified_at' => now(),
@@ -57,7 +67,7 @@ class DefaultAccountsSeeder extends Seeder
                 'is_super_admin' => true,
                 'status' => 'active',
                 'password' => Hash::make($password),
-                'must_change_password' => true,
+                'must_change_password' => $this->requiresPasswordChange(),
             ]);
         }
 
@@ -154,7 +164,7 @@ class DefaultAccountsSeeder extends Seeder
                 'name' => 'Admin Toko',
                 'phone' => '081234567890',
                 'password' => Hash::make($adminPassword),
-                'must_change_password' => true,
+                'must_change_password' => $this->requiresPasswordChange(),
                 'outlet_id' => $outlet->id,
                 'is_super_admin' => false,
                 'status' => 'active',
@@ -164,7 +174,7 @@ class DefaultAccountsSeeder extends Seeder
 
         $admin->update([
             'password' => Hash::make($adminPassword),
-            'must_change_password' => true,
+            'must_change_password' => $this->requiresPasswordChange(),
             'status' => 'active',
             'outlet_id' => $outlet->id,
             'is_super_admin' => false,
