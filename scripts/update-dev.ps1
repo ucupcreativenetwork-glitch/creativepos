@@ -23,14 +23,28 @@ if (-not (Test-Path ".git")) {
 }
 
 Write-Host "`n[1/5] Git pull dari GitHub..." -ForegroundColor Yellow
-git fetch origin main
-git pull --ff-only origin main
+$prevEap = $ErrorActionPreference
+$ErrorActionPreference = "Continue"
+git fetch origin main 2>&1 | Out-Host
+git pull --ff-only origin main 2>&1 | Out-Host
+$ErrorActionPreference = $prevEap
+if ($LASTEXITCODE -ne 0) { throw "git pull gagal (exit $LASTEXITCODE)" }
 
 if (-not $SkipComposer) {
     Write-Host "`n[2/5] Composer install..." -ForegroundColor Yellow
     Push-Location (Join-Path $Root "backend")
-    & $php composer.phar install --no-interaction --prefer-dist --ignore-platform-req=ext-pcntl --ignore-platform-req=ext-posix 2>$null
-    if ($LASTEXITCODE -ne 0) { & $php "$(Join-Path $Root 'backend\composer.phar')" install --no-interaction --prefer-dist --ignore-platform-req=ext-pcntl --ignore-platform-req=ext-posix }
+    $composerPhar = Join-Path $Root "backend\composer.phar"
+    $prevEap = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
+    if (Test-Path "composer.phar") {
+        & $php composer.phar install --no-interaction --prefer-dist --ignore-platform-req=ext-pcntl --ignore-platform-req=ext-posix
+    } elseif (Test-Path $composerPhar) {
+        & $php $composerPhar install --no-interaction --prefer-dist --ignore-platform-req=ext-pcntl --ignore-platform-req=ext-posix
+    } else {
+        throw "composer.phar tidak ditemukan di backend/"
+    }
+    $ErrorActionPreference = $prevEap
+    if ($LASTEXITCODE -ne 0) { throw "Composer install gagal (exit $LASTEXITCODE)" }
     Pop-Location
 } else {
     Write-Host "`n[2/5] Lewati composer." -ForegroundColor DarkGray
@@ -43,10 +57,15 @@ Pop-Location
 
 Write-Host "`n[4/5] Frontend npm install + build..." -ForegroundColor Yellow
 Push-Location (Join-Path $Root "frontend")
+$prevEap = $ErrorActionPreference
+$ErrorActionPreference = "Continue"
 npm install --no-fund --no-audit
+if ($LASTEXITCODE -ne 0) { throw "npm install gagal (exit $LASTEXITCODE)" }
 if (-not $SkipFrontendBuild) {
     npm run build
+    if ($LASTEXITCODE -ne 0) { throw "npm run build gagal (exit $LASTEXITCODE)" }
 }
+$ErrorActionPreference = $prevEap
 Pop-Location
 
 if (-not $SkipFlutter) {
