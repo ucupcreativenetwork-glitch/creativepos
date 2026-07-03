@@ -67,6 +67,14 @@ $backendContent = $backendContent -replace '(?m)^APP_DEBUG=.*', 'APP_DEBUG=false
 $backendContent = $backendContent -replace '(?m)^APP_URL=.*', "APP_URL=$AppUrl"
 $backendContent = $backendContent -replace '(?m)^DB_HOST=.*', 'DB_HOST=mysql'
 $backendContent = $backendContent -replace '(?m)^REDIS_HOST=.*', 'REDIS_HOST=redis'
+
+$dockerEnvLines = Get-Content $DockerEnv
+$dbName = ($dockerEnvLines | Where-Object { $_ -match '^DB_DATABASE=' }) -replace '^DB_DATABASE=', ''
+$dbUser = ($dockerEnvLines | Where-Object { $_ -match '^DB_USERNAME=' }) -replace '^DB_USERNAME=', ''
+$dbPass = ($dockerEnvLines | Where-Object { $_ -match '^DB_PASSWORD=' }) -replace '^DB_PASSWORD=', ''
+if ($dbName) { $backendContent = $backendContent -replace '(?m)^DB_DATABASE=.*', "DB_DATABASE=$dbName" }
+if ($dbUser) { $backendContent = $backendContent -replace '(?m)^DB_USERNAME=.*', "DB_USERNAME=$dbUser" }
+if ($dbPass) { $backendContent = $backendContent -replace '(?m)^DB_PASSWORD=.*', "DB_PASSWORD=$dbPass" }
 $backendContent = $backendContent -replace '(?m)^FRONTEND_URL=.*', "FRONTEND_URL=$AppUrl"
 $backendContent = $backendContent -replace '(?m)^SANCTUM_STATEFUL_DOMAINS=.*', "SANCTUM_STATEFUL_DOMAINS=$AppHost,localhost,127.0.0.1"
 $backendContent = $backendContent -replace '(?m)^REVERB_HOST=.*', "REVERB_HOST=$AppHost"
@@ -89,7 +97,14 @@ Write-Host "Membangun dan menjalankan container..." -ForegroundColor Yellow
 docker compose -f docker-compose.client.yml up -d --build
 
 Write-Host "Menunggu MySQL siap..."
-Start-Sleep -Seconds 15
+for ($i = 1; $i -le 45; $i++) {
+    docker compose -f docker-compose.client.yml exec -T mysql mysqladmin ping -h localhost 2>$null | Out-Null
+    if ($LASTEXITCODE -eq 0) {
+        Write-Host "MySQL siap."
+        break
+    }
+    Start-Sleep -Seconds 2
+}
 
 docker compose -f docker-compose.client.yml exec -T backend php artisan key:generate --force
 docker compose -f docker-compose.client.yml exec -T backend php artisan storage:link --force 2>$null

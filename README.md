@@ -34,21 +34,41 @@ CreativePOS adalah platform SaaS enterprise siap pasar untuk bisnis F&B dan reta
 
 ---
 
-## Instalasi Server Client (On-Premise)
+## Instalasi Server dari GitHub (1 perintah)
 
-Untuk dipasang di server milik client (toko/restoran, LAN):
+**Persyaratan server:** Docker + Docker Compose + Git
 
-```powershell
-# Windows + Docker Desktop
-powershell -ExecutionPolicy Bypass -File scripts\install-client.ps1 -AppHost 192.168.1.50
-```
+### Linux (Ubuntu / Debian)
 
 ```bash
-# Linux Ubuntu
-bash scripts/install-client.sh 192.168.1.50
+sudo git clone https://github.com/ucupcreativenetwork-glitch/creativepos.git /opt/creativepos
+cd /opt/creativepos
+sudo bash install.sh 10.110.1.15    # ganti dengan IP server Anda
 ```
 
-Akses: `http://IP-SERVER/pos` — panduan lengkap: [docs/CLIENT-INSTALL.md](docs/CLIENT-INSTALL.md)
+### Windows Server + Docker Desktop
+
+```powershell
+git clone https://github.com/ucupcreativenetwork-glitch/creativepos.git D:\creativepos
+cd D:\creativepos
+powershell -ExecutionPolicy Bypass -File install.ps1 -AppHost 10.110.1.15
+```
+
+### Update
+
+```bash
+cd /opt/creativepos && sudo bash update.sh
+```
+
+| Setelah install | URL |
+|-----------------|-----|
+| Web POS | `http://IP-SERVER/pos` |
+| Daftar akun | `http://IP-SERVER/register` |
+| APK mobile | `http://IP-SERVER/api/v1/mobile/version?platform=android` |
+
+Panduan lengkap: [docs/CLIENT-INSTALL.md](docs/CLIENT-INSTALL.md)
+
+**Repo private:** set `GITHUB_TOKEN` (PAT dengan scope `repo`) sebelum `git clone`.
 
 ## Aplikasi Android
 

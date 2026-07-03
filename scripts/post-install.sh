@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+cd "$ROOT/docker"
+
+APP_HOST="$(grep -E '^APP_HOST=' ../docker/.env 2>/dev/null | cut -d= -f2- || echo localhost)"
+APP_PORT="$(grep -E '^APP_PORT=' ../docker/.env 2>/dev/null | cut -d= -f2- || echo 80)"
+
+if [[ "$APP_PORT" == "80" ]]; then
+  BASE="http://${APP_HOST}"
+else
+  BASE="http://${APP_HOST}:${APP_PORT}"
+fi
+
+echo ""
+echo "╔══════════════════════════════════════════════════════════╗"
+echo "║              CreativePOS — Siap Digunakan                ║"
+echo "╠══════════════════════════════════════════════════════════╣"
+printf "║  Web POS     : %-41s ║\n" "${BASE}/pos"
+printf "║  Dashboard   : %-41s ║\n" "${BASE}/"
+printf "║  Daftar      : %-41s ║\n" "${BASE}/register"
+printf "║  API Health  : %-41s ║\n" "${BASE}/api/v1/health"
+printf "║  APK Mobile  : %-41s ║\n" "${BASE}/api/v1/mobile/version?platform=android"
+echo "╠══════════════════════════════════════════════════════════╣"
+echo "║  Update      : bash scripts/update-from-github.sh        ║"
+echo "║  Status      : cd docker && docker compose -f            ║"
+echo "║                docker-compose.client.yml ps              ║"
+echo "╚══════════════════════════════════════════════════════════╝"
+echo ""
+
+# Health check
+for i in $(seq 1 20); do
+  if curl -fsS "${BASE}/api/v1/health" >/dev/null 2>&1; then
+    echo "✓ Health check OK"
+    exit 0
+  fi
+  sleep 3
+done
+
+echo "⚠ Health check belum OK — tunggu 1-2 menit lalu coba lagi."
+exit 0

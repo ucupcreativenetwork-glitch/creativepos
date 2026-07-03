@@ -55,6 +55,14 @@ sed -i 's/^APP_DEBUG=.*/APP_DEBUG=false/' "$ROOT/backend/.env"
 sed -i "s|^APP_URL=.*|APP_URL=${APP_URL}|" "$ROOT/backend/.env"
 sed -i 's/^DB_HOST=.*/DB_HOST=mysql/' "$ROOT/backend/.env"
 sed -i 's/^REDIS_HOST=.*/REDIS_HOST=redis/' "$ROOT/backend/.env"
+
+# Sinkronkan kredensial DB dari docker/.env
+DB_NAME="$(grep -E '^DB_DATABASE=' "$ROOT/docker/.env" | cut -d= -f2- | tr -d '\r')"
+DB_USER="$(grep -E '^DB_USERNAME=' "$ROOT/docker/.env" | cut -d= -f2- | tr -d '\r')"
+DB_PASS="$(grep -E '^DB_PASSWORD=' "$ROOT/docker/.env" | cut -d= -f2- | tr -d '\r')"
+[[ -n "$DB_NAME" ]] && sed -i "s/^DB_DATABASE=.*/DB_DATABASE=${DB_NAME}/" "$ROOT/backend/.env"
+[[ -n "$DB_USER" ]] && sed -i "s/^DB_USERNAME=.*/DB_USERNAME=${DB_USER}/" "$ROOT/backend/.env"
+[[ -n "$DB_PASS" ]] && sed -i "s/^DB_PASSWORD=.*/DB_PASSWORD=${DB_PASS}/" "$ROOT/backend/.env"
 sed -i "s|^FRONTEND_URL=.*|FRONTEND_URL=${APP_URL}|" "$ROOT/backend/.env"
 sed -i "s/^SANCTUM_STATEFUL_DOMAINS=.*/SANCTUM_STATEFUL_DOMAINS=${APP_HOST},localhost,127.0.0.1/" "$ROOT/backend/.env"
 sed -i "s/^REVERB_HOST=.*/REVERB_HOST=${APP_HOST}/" "$ROOT/backend/.env"
@@ -74,7 +82,13 @@ echo "Membangun dan menjalankan container..."
 docker compose -f docker-compose.client.yml up -d --build
 
 echo "Menunggu MySQL siap..."
-sleep 15
+for i in $(seq 1 45); do
+  if docker compose -f docker-compose.client.yml exec -T mysql mysqladmin ping -h localhost --silent 2>/dev/null; then
+    echo "MySQL siap."
+    break
+  fi
+  sleep 2
+done
 
 docker compose -f docker-compose.client.yml exec -T backend php artisan key:generate --force
 docker compose -f docker-compose.client.yml exec -T backend php artisan storage:link --force || true

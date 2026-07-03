@@ -1,0 +1,1 @@
+powershell -ExecutionPolicy Bypass -File "$PSScriptRoot\scripts\update-from-github.ps1" @args

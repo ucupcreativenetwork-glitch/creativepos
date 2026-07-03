@@ -14,18 +14,71 @@ Panduan memasang CreativePOS di server milik client (toko, restoran, kantor) —
 
 Software: **Docker** + **Docker Compose**
 
-## Instalasi Cepat
+## Instalasi dari GitHub (Disarankan)
+
+Semua komponen (backend, frontend, database, Redis, nginx) diinstall dari repo GitHub — tidak perlu copy manual.
+
+### Linux — Server baru
+
+```bash
+# 1. Clone
+sudo git clone https://github.com/ucupcreativenetwork-glitch/creativepos.git /opt/creativepos
+
+# 2. Install (ganti IP dengan IP server Anda)
+cd /opt/creativepos
+sudo bash install.sh 10.110.1.15
+```
+
+**Repo private?** Buat Personal Access Token (repo scope), lalu:
+
+```bash
+export GITHUB_TOKEN=ghp_xxxxxxxx
+sudo -E git clone https://${GITHUB_TOKEN}@github.com/ucupcreativenetwork-glitch/creativepos.git /opt/creativepos
+cd /opt/creativepos && sudo -E bash install.sh 10.110.1.15
+```
+
+### Windows — Server baru
+
+```powershell
+git clone https://github.com/ucupcreativenetwork-glitch/creativepos.git D:\creativepos
+cd D:\creativepos
+powershell -ExecutionPolicy Bypass -File install.ps1 -AppHost 10.110.1.15
+```
+
+### Update versi terbaru
+
+```bash
+cd /opt/creativepos
+sudo bash update.sh
+```
+
+```powershell
+cd D:\creativepos
+powershell -ExecutionPolicy Bypass -File update.ps1
+```
+
+### APK Android otomatis
+
+Jika ada **GitHub Release** dengan file `.apk` (tag `v1.3.1-18`), skrip install akan:
+1. Unduh APK dari Release
+2. Publish ke server → `http://IP-SERVER/api/v1/mobile/download/...`
+
+Buat release dari dev machine:
+
+```bash
+git tag v1.3.1-18
+git push origin v1.3.1-18
+# GitHub Actions membangun APK & membuat Release otomatis
+```
+
+---
+
+## Instalasi Manual (tanpa GitHub)
 
 ### Windows (PowerShell)
 
 ```powershell
 cd D:\pos
-powershell -ExecutionPolicy Bypass -File scripts\install-client.ps1
-```
-
-Opsional — tentukan IP manual:
-
-```powershell
 powershell -ExecutionPolicy Bypass -File scripts\install-client.ps1 -AppHost 192.168.1.50
 ```
 
@@ -33,7 +86,6 @@ powershell -ExecutionPolicy Bypass -File scripts\install-client.ps1 -AppHost 192
 
 ```bash
 cd /opt/creativepos
-chmod +x scripts/install-client.sh
 sudo bash scripts/install-client.sh 192.168.1.50
 ```
 
