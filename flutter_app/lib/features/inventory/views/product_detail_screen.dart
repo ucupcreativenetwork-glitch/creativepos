@@ -11,22 +11,49 @@ import '../models/inventory_models.dart';
 import '../providers/inventory_providers.dart';
 import 'stock_movement_sheet.dart';
 
-class ProductDetailScreen extends ConsumerStatefulWidget {
-  const ProductDetailScreen({super.key, required this.uuid});
+class ProductDetailKey {
+  const ProductDetailKey({required this.id, this.uuid});
 
-  final String uuid;
+  final int id;
+  final String? uuid;
+
+  @override
+  bool operator ==(Object other) =>
+      other is ProductDetailKey && other.id == id && other.uuid == uuid;
+
+  @override
+  int get hashCode => Object.hash(id, uuid);
+}
+
+class ProductDetailScreen extends ConsumerStatefulWidget {
+  const ProductDetailScreen({
+    super.key,
+    required this.productId,
+    this.productUuid,
+  });
+
+  final int productId;
+  final String? productUuid;
 
   @override
   ConsumerState<ProductDetailScreen> createState() =>
       _ProductDetailScreenState();
 }
 
-final productDetailProvider =
-    FutureProvider.autoDispose.family<InventoryProduct, String>((ref, uuid) async {
-  return ref.watch(inventoryRepositoryProvider).getProduct(uuid);
+final productDetailProvider = FutureProvider.autoDispose
+    .family<InventoryProduct, ProductDetailKey>((ref, key) async {
+  return ref.watch(inventoryRepositoryProvider).getProductDetail(
+        id: key.id,
+        uuid: key.uuid,
+      );
 });
 
 class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
+  ProductDetailKey get _detailKey => ProductDetailKey(
+        id: widget.productId,
+        uuid: widget.productUuid,
+      );
+
   Future<void> _openStockSheet(
     InventoryProduct product,
     StockMovementAction action,
@@ -54,7 +81,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
     );
 
     if (ok == true && mounted) {
-      ref.invalidate(productDetailProvider(widget.uuid));
+      ref.invalidate(productDetailProvider(_detailKey));
       ref.invalidate(inventoryProductsProvider);
       ref.invalidate(inventoryStocksProvider);
       ref.invalidate(inventoryAlertsProvider);
@@ -70,11 +97,13 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Detail Produk')),
-      body: ref.watch(productDetailProvider(widget.uuid)).when(
+      body: ref.watch(productDetailProvider(_detailKey)).when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => ErrorView(
-          message: e.toString(),
-          onRetry: () => ref.invalidate(productDetailProvider(widget.uuid)),
+          message: e.toString().contains('Resource not found')
+              ? 'Produk tidak ditemukan. Coba refresh daftar produk.'
+              : e.toString(),
+          onRetry: () => ref.invalidate(productDetailProvider(_detailKey)),
         ),
         data: (product) {
           final image = resolveMediaUrl(product.imageUrl, server);

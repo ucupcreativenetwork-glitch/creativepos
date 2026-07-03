@@ -1,5 +1,25 @@
 import '../../../core/utils/json_utils.dart';
 
+class InventoryCategory {
+  const InventoryCategory({
+    required this.id,
+    required this.name,
+    this.uuid,
+  });
+
+  final int id;
+  final String name;
+  final String? uuid;
+
+  factory InventoryCategory.fromJson(Map<String, dynamic> json) {
+    return InventoryCategory(
+      id: parseJsonInt(json['id']),
+      name: parseJsonString(json['name']),
+      uuid: json['uuid'] as String?,
+    );
+  }
+}
+
 class Warehouse {
   const Warehouse({
     required this.id,

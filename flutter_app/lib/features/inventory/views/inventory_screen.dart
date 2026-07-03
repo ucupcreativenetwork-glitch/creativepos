@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/auth/permissions.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/utils/json_utils.dart';
@@ -8,11 +9,14 @@ import '../../../core/utils/media_url.dart';
 import '../../../shared/widgets/empty_state.dart';
 import '../../../shared/widgets/error_view.dart';
 import '../../../shared/widgets/skeleton_box.dart';
+import '../../auth/models/user_model.dart';
 import '../../auth/providers/auth_providers.dart';
 import '../models/inventory_models.dart';
 import '../providers/inventory_providers.dart';
 import 'product_detail_screen.dart';
+import 'product_form_sheet.dart';
 import 'stock_movement_sheet.dart';
+import 'stock_receive_sheet.dart';
 
 class InventoryScreen extends ConsumerStatefulWidget {
   const InventoryScreen({super.key});
@@ -31,6 +35,9 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen>
   void initState() {
     super.initState();
     _tabs = TabController(length: 3, vsync: this);
+    _tabs.addListener(() {
+      if (!_tabs.indexIsChanging) setState(() {});
+    });
   }
 
   @override
@@ -64,9 +71,52 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen>
     }
   }
 
+  Future<void> _openAddProduct() async {
+    final ok = await showProductFormSheet(context);
+    if (ok == true && mounted) {
+      ref.invalidate(inventoryProductsProvider(InventoryQuery(search: _search)));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Produk berhasil ditambahkan')),
+      );
+    }
+  }
+
+  Future<void> _openAddStock() async {
+    final ok = await showInventoryStockReceiveSheet(context);
+    if (ok == true && mounted) {
+      ref.invalidate(inventoryProductsProvider(InventoryQuery(search: _search)));
+      ref.invalidate(inventoryStocksProvider(InventoryQuery(search: _search)));
+      ref.invalidate(inventoryAlertsProvider);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Stok berhasil diperbarui')),
+      );
+    }
+  }
+
+  Widget? _buildFab(AuthSession? session) {
+    if (_tabs.index == 0 && sessionCan(session, 'inventory.create')) {
+      return FloatingActionButton.extended(
+        onPressed: _openAddProduct,
+        icon: const Icon(Icons.add),
+        label: const Text('Tambah Produk'),
+      );
+    }
+
+    if (_tabs.index == 1 && sessionCan(session, 'inventory.stock.adjust')) {
+      return FloatingActionButton.extended(
+        onPressed: _openAddStock,
+        icon: const Icon(Icons.add_box_outlined),
+        label: const Text('Tambah Stok'),
+      );
+    }
+
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     final server = ref.watch(serverUrlProvider);
+    final session = ref.watch(authControllerProvider).session;
     final products = ref.watch(inventoryProductsProvider(InventoryQuery(search: _search)));
     final stocks = ref.watch(inventoryStocksProvider(InventoryQuery(search: _search)));
     final alerts = ref.watch(inventoryAlertsProvider);
@@ -83,6 +133,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen>
           ],
         ),
       ),
+      floatingActionButton: _buildFab(session),
       body: Column(
         children: [
           Padding(
@@ -127,7 +178,17 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen>
                         title: _search.isNotEmpty ? 'Produk tidak ditemukan' : 'Belum ada produk',
                         subtitle: _search.isNotEmpty
                             ? 'Coba kata kunci lain'
-                            : 'Tambahkan produk dari web admin',
+                            : sessionCan(session, 'inventory.create')
+                                ? 'Tekan Tambah Produk untuk membuat produk baru'
+                                : 'Belum ada produk di inventori',
+                        actionLabel: _search.isEmpty &&
+                                sessionCan(session, 'inventory.create')
+                            ? 'Tambah Produk'
+                            : null,
+                        onAction: _search.isEmpty &&
+                                sessionCan(session, 'inventory.create')
+                            ? _openAddProduct
+                            : null,
                       );
                     }
                     return RefreshIndicator(
@@ -152,7 +213,12 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen>
                             trailing: Text(Formatters.currency(product.basePrice)),
                             onTap: () => Navigator.of(context).push(
                               MaterialPageRoute(
-                                builder: (_) => ProductDetailScreen(uuid: product.uuid),
+                                builder: (_) => ProductDetailScreen(
+                                  productId: product.id,
+                                  productUuid: product.uuid.isNotEmpty
+                                      ? product.uuid
+                                      : null,
+                                ),
                               ),
                             ),
                           );
