@@ -30,6 +30,8 @@ Usage:
   bash install.sh [IP_SERVER] [PORT]
   bash scripts/install-from-github.sh --clone /opt/creativepos [IP] [PORT]
 
+Tanpa IP: otomatis baca docker/.env → backend/.env → deteksi IP LAN/domain.
+
 Opsi environment:
   GITHUB_TOKEN     Token untuk repo private (PAT classic/repo)
   GITHUB_REPO      URL git (default: creativepos official)
@@ -41,8 +43,10 @@ Opsi environment:
 Contoh:
   git clone https://github.com/ucupcreativenetwork-glitch/creativepos.git /opt/creativepos
   cd /opt/creativepos && sudo bash install.sh
+  cd /opt/creativepos && sudo bash install.sh   # tanpa IP = auto-detect
 
   # Satu baris (repo public):
+  curl -fsSL .../install-from-github.sh | sudo bash -s -- --clone /opt/creativepos
   curl -fsSL .../install-from-github.sh | sudo bash -s -- --clone /opt/creativepos 192.168.1.50
 EOF
 }

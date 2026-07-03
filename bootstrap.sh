@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 # CreativePOS — Bootstrap server Ubuntu kosong (satu baris dari GitHub)
 #
-# Server baru (Ubuntu 22.04+):
-#   curl -fsSL https://raw.githubusercontent.com/ucupcreativenetwork-glitch/creativepos/main/bootstrap.sh | sudo bash -s -- 10.110.1.15
+# Server baru (Ubuntu 22.04+) — IP opsional (auto-detect dari jaringan):
+#   curl -fsSL https://raw.githubusercontent.com/ucupcreativenetwork-glitch/creativepos/main/bootstrap.sh | sudo bash
+#   curl -fsSL .../bootstrap.sh | sudo bash -s -- 10.110.1.15
 #
 # Repo private:
 #   export GITHUB_TOKEN=ghp_xxxx

@@ -41,7 +41,8 @@ Docker, Docker Compose, dan Git **diinstall otomatis** oleh skrip.
 ### Ubuntu — server kosong (1 baris)
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/ucupcreativenetwork-glitch/creativepos/main/bootstrap.sh | sudo bash -s -- 10.110.1.15
+curl -fsSL https://raw.githubusercontent.com/ucupcreativenetwork-glitch/creativepos/main/bootstrap.sh | sudo bash
+# IP opsional: ... | sudo bash -s -- 10.110.1.15
 ```
 
 ### Ubuntu — sudah ada Git
@@ -49,7 +50,7 @@ curl -fsSL https://raw.githubusercontent.com/ucupcreativenetwork-glitch/creative
 ```bash
 sudo git clone https://github.com/ucupcreativenetwork-glitch/creativepos.git /opt/creativepos
 cd /opt/creativepos
-sudo bash install.sh 10.110.1.15
+sudo bash install.sh
 ```
 
 ### Windows — Administrator (Docker Desktop auto-install)

@@ -1,7 +1,8 @@
 # CreativePOS — Bootstrap server kosong (Windows) dari GitHub
 # Usage (Administrator):
 #   powershell -ExecutionPolicy Bypass -Command "irm https://raw.githubusercontent.com/ucupcreativenetwork-glitch/creativepos/main/bootstrap.ps1 | iex"
-#   # atau setelah download:
+#   # IP opsional (tanpa -AppHost = auto-detect):
+#   powershell -ExecutionPolicy Bypass -File bootstrap.ps1
 #   powershell -ExecutionPolicy Bypass -File bootstrap.ps1 -AppHost 10.110.1.15
 
 param(

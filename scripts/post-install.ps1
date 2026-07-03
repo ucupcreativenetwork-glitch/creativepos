@@ -1,16 +1,24 @@
 $Root = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
+$backendEnv = Join-Path $Root "backend\.env"
 $dockerEnv = Join-Path $Root "docker\.env"
 
-$appHost = "localhost"
-$appPort = "80"
-if (Test-Path $dockerEnv) {
-    foreach ($line in Get-Content $dockerEnv) {
-        if ($line -match '^APP_HOST=(.+)$') { $appHost = $Matches[1].Trim() }
-        if ($line -match '^APP_PORT=(.+)$') { $appPort = $Matches[1].Trim() }
+$base = $null
+if (Test-Path $backendEnv) {
+    foreach ($line in Get-Content $backendEnv) {
+        if ($line -match '^APP_URL=(.+)$') { $base = $Matches[1].Trim(); break }
     }
 }
-
-$base = if ($appPort -eq "80") { "http://$appHost" } else { "http://${appHost}:$appPort" }
+if (-not $base) {
+    $appHost = "localhost"
+    $appPort = "80"
+    if (Test-Path $dockerEnv) {
+        foreach ($line in Get-Content $dockerEnv) {
+            if ($line -match '^APP_HOST=(.+)$') { $appHost = $Matches[1].Trim() }
+            if ($line -match '^APP_PORT=(.+)$') { $appPort = $Matches[1].Trim() }
+        }
+    }
+    $base = if ($appPort -eq "80") { "http://$appHost" } else { "http://${appHost}:$appPort" }
+}
 
 Write-Host ""
 Write-Host "╔══════════════════════════════════════════════════════════╗" -ForegroundColor Green

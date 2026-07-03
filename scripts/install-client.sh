@@ -1,31 +1,28 @@
 #!/usr/bin/env bash
 # CreativePOS — Instalasi server client (Linux / Ubuntu)
 # Usage: bash scripts/install-client.sh [APP_HOST] [APP_PORT]
+# Tanpa argumen: baca docker/.env → backend/.env → auto-detect IP/domain
 
 set -euo pipefail
 
-ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-APP_HOST="${1:-}"
-APP_PORT="${2:-80}"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+CLI_HOST="${1:-}"
+CLI_PORT="${2:-80}"
 SKIP_SEED="${SKIP_SEED:-0}"
 
-detect_ip() {
-  hostname -I 2>/dev/null | awk '{print $1}'
-}
+# shellcheck source=lib/resolve-app-host.sh
+source "$SCRIPT_DIR/lib/resolve-app-host.sh"
+resolve_app_host "$ROOT" "$CLI_HOST" "$CLI_PORT"
 
-if [[ -z "$APP_HOST" ]]; then
-  APP_HOST="$(detect_ip)"
-  if [[ -z "$APP_HOST" ]]; then
-    read -rp "Masukkan IP/hostname server: " APP_HOST
-  else
-    echo "Menggunakan IP LAN: $APP_HOST"
-  fi
-fi
+APP_HOST="$RESOLVED_HOST"
+APP_PORT="$RESOLVED_PORT"
+APP_SCHEME="$RESOLVED_SCHEME"
+APP_URL="$RESOLVED_URL"
 
-if [[ "$APP_PORT" == "80" ]]; then
-  APP_URL="http://${APP_HOST}"
-else
-  APP_URL="http://${APP_HOST}:${APP_PORT}"
+echo "Host   : $APP_HOST (sumber: $RESOLVED_SOURCE)"
+if [[ "$APP_SCHEME" == "https" ]]; then
+  echo "HTTPS  : ya"
 fi
 
 echo ""
@@ -66,8 +63,8 @@ DB_PASS="$(grep -E '^DB_PASSWORD=' "$ROOT/docker/.env" | cut -d= -f2- | tr -d '\
 sed -i "s|^FRONTEND_URL=.*|FRONTEND_URL=${APP_URL}|" "$ROOT/backend/.env"
 sed -i "s/^SANCTUM_STATEFUL_DOMAINS=.*/SANCTUM_STATEFUL_DOMAINS=${APP_HOST},localhost,127.0.0.1/" "$ROOT/backend/.env"
 sed -i "s/^REVERB_HOST=.*/REVERB_HOST=${APP_HOST}/" "$ROOT/backend/.env"
-sed -i 's/^REVERB_PORT=.*/REVERB_PORT=80/' "$ROOT/backend/.env"
-sed -i 's/^REVERB_SCHEME=.*/REVERB_SCHEME=http/' "$ROOT/backend/.env"
+sed -i "s/^REVERB_PORT=.*/REVERB_PORT=${APP_PORT}/" "$ROOT/backend/.env"
+sed -i "s/^REVERB_SCHEME=.*/REVERB_SCHEME=${APP_SCHEME}/" "$ROOT/backend/.env"
 sed -i "s/^REVERB_APP_KEY=.*/REVERB_APP_KEY=${REVERB_KEY}/" "$ROOT/backend/.env"
 sed -i "s/^REVERB_APP_SECRET=.*/REVERB_APP_SECRET=${REVERB_SECRET}/" "$ROOT/backend/.env"
 

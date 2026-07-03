@@ -4,13 +4,15 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT/docker"
 
-APP_HOST="$(grep -E '^APP_HOST=' ../docker/.env 2>/dev/null | cut -d= -f2- || echo localhost)"
-APP_PORT="$(grep -E '^APP_PORT=' ../docker/.env 2>/dev/null | cut -d= -f2- || echo 80)"
-
-if [[ "$APP_PORT" == "80" ]]; then
-  BASE="http://${APP_HOST}"
-else
-  BASE="http://${APP_HOST}:${APP_PORT}"
+BASE="$(grep -E '^APP_URL=' ../backend/.env 2>/dev/null | head -1 | cut -d= -f2- | tr -d '\r' || true)"
+if [[ -z "$BASE" ]]; then
+  APP_HOST="$(grep -E '^APP_HOST=' ../docker/.env 2>/dev/null | cut -d= -f2- | tr -d '\r' || echo localhost)"
+  APP_PORT="$(grep -E '^APP_PORT=' ../docker/.env 2>/dev/null | cut -d= -f2- | tr -d '\r' || echo 80)"
+  if [[ "$APP_PORT" == "80" ]]; then
+    BASE="http://${APP_HOST}"
+  else
+    BASE="http://${APP_HOST}:${APP_PORT}"
+  fi
 fi
 
 echo ""

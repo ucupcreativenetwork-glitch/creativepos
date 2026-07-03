@@ -8,30 +8,21 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
-$Root = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
+$ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
+$Root = Split-Path -Parent $ScriptDir
 
-function Get-LocalLanIp {
-    $ip = Get-NetIPAddress -AddressFamily IPv4 |
-        Where-Object {
-            $_.IPAddress -notlike "127.*" -and
-            $_.IPAddress -notlike "169.254.*" -and
-            $_.PrefixOrigin -ne "WellKnown"
-        } |
-        Select-Object -First 1 -ExpandProperty IPAddress
-    return $ip
+. (Join-Path $ScriptDir "lib\Resolve-AppHost.ps1")
+$resolved = Resolve-AppHost -Root $Root -CliHost $AppHost -CliPort $AppPort
+
+$AppHost = $resolved.AppHost
+$AppPort = $resolved.Port
+$AppScheme = $resolved.Scheme
+$AppUrl = $resolved.Url
+
+Write-Host "Host   : $AppHost (sumber: $($resolved.Source))"
+if ($AppScheme -eq 'https') {
+    Write-Host "HTTPS  : ya"
 }
-
-if ([string]::IsNullOrWhiteSpace($AppHost)) {
-    $detected = Get-LocalLanIp
-    if ($detected) {
-        $AppHost = $detected
-        Write-Host "Menggunakan IP LAN: $AppHost"
-    } else {
-        $AppHost = Read-Host "Masukkan IP/hostname server (contoh: 192.168.1.50)"
-    }
-}
-
-$AppUrl = if ($AppPort -eq 80) { "http://$AppHost" } else { "http://${AppHost}:$AppPort" }
 
 Write-Host "`n=== CreativePOS Client Install ===" -ForegroundColor Cyan
 Write-Host "URL akses: $AppUrl"
@@ -78,8 +69,8 @@ if ($dbPass) { $backendContent = $backendContent -replace '(?m)^DB_PASSWORD=.*',
 $backendContent = $backendContent -replace '(?m)^FRONTEND_URL=.*', "FRONTEND_URL=$AppUrl"
 $backendContent = $backendContent -replace '(?m)^SANCTUM_STATEFUL_DOMAINS=.*', "SANCTUM_STATEFUL_DOMAINS=$AppHost,localhost,127.0.0.1"
 $backendContent = $backendContent -replace '(?m)^REVERB_HOST=.*', "REVERB_HOST=$AppHost"
-$backendContent = $backendContent -replace '(?m)^REVERB_PORT=.*', 'REVERB_PORT=80'
-$backendContent = $backendContent -replace '(?m)^REVERB_SCHEME=.*', 'REVERB_SCHEME=http'
+$backendContent = $backendContent -replace '(?m)^REVERB_PORT=.*', "REVERB_PORT=$AppPort"
+$backendContent = $backendContent -replace '(?m)^REVERB_SCHEME=.*', "REVERB_SCHEME=$AppScheme"
 $backendContent = $backendContent -replace '(?m)^REVERB_APP_KEY=.*', "REVERB_APP_KEY=$reverbKey"
 $backendContent = $backendContent -replace '(?m)^REVERB_APP_SECRET=.*', "REVERB_APP_SECRET=$reverbSecret"
 Set-Content $BackendEnv $backendContent.TrimEnd()

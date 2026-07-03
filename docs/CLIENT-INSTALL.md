@@ -19,10 +19,14 @@ Software diinstall **otomatis** oleh skrip: **Git**, **Docker**, **Docker Compos
 Docker, Git, dan CreativePOS terinstall otomatis:
 
 ```bash
+# Auto-detect IP/domain (disarankan)
+curl -fsSL https://raw.githubusercontent.com/ucupcreativenetwork-glitch/creativepos/main/bootstrap.sh | sudo bash
+
+# Atau tentukan manual
 curl -fsSL https://raw.githubusercontent.com/ucupcreativenetwork-glitch/creativepos/main/bootstrap.sh | sudo bash -s -- 10.110.1.15
 ```
 
-Ganti `10.110.1.15` dengan IP server Anda.
+Tanpa argumen IP, skrip membaca `docker/.env` → `backend/.env` → mendeteksi IP LAN (interface default route) → hostname.
 
 ## Windows Server Kosong (Administrator)
 
@@ -31,8 +35,8 @@ Buka **PowerShell sebagai Administrator**:
 ```powershell
 Set-ExecutionPolicy Bypass -Scope Process -Force
 irm https://raw.githubusercontent.com/ucupcreativenetwork-glitch/creativepos/main/bootstrap.ps1 | iex
-# Lalu jalankan lagi dengan IP:
-powershell -ExecutionPolicy Bypass -File D:\creativepos\bootstrap.ps1 -AppHost 10.110.1.15
+# IP opsional — tanpa -AppHost akan auto-detect
+powershell -ExecutionPolicy Bypass -File D:\creativepos\bootstrap.ps1
 ```
 
 Atau clone dulu lalu install (Docker Desktop diinstall otomatis):
@@ -53,9 +57,10 @@ Semua komponen (backend, frontend, database, Redis, nginx) diinstall dari repo G
 # 1. Clone
 sudo git clone https://github.com/ucupcreativenetwork-glitch/creativepos.git /opt/creativepos
 
-# 2. Install (ganti IP dengan IP server Anda)
+# 2. Install (IP opsional — kosongkan untuk auto-detect)
 cd /opt/creativepos
-sudo bash install.sh 10.110.1.15
+sudo bash install.sh
+# atau: sudo bash install.sh 10.110.1.15
 ```
 
 **Repo private?** Buat Personal Access Token (repo scope), lalu:
@@ -179,10 +184,29 @@ Ringkasnya (Flutter — disarankan):
 
 Alternatif Capacitor: build dari folder `mobile/` (lihat ANDROID-APP.md).
 
+## Ubah IP / Domain (setelah install)
+
+Jika server pindah jaringan atau ganti hostname:
+
+```bash
+cd /opt/creativepos
+sudo bash scripts/reconfigure-host.sh          # auto-detect ulang
+sudo bash scripts/reconfigure-host.sh 192.168.1.50   # manual
+```
+
+```powershell
+cd D:\creativepos
+powershell -ExecutionPolicy Bypass -File scripts\reconfigure-host.ps1
+powershell -ExecutionPolicy Bypass -File scripts\reconfigure-host.ps1 -AppHost 192.168.1.50
+```
+
+Prioritas deteksi: argumen CLI → `docker/.env` (`APP_HOST`) → `backend/.env` (`APP_URL`) → IP LAN → hostname.
+
 ## Troubleshooting
 
 | Masalah | Solusi |
 |---------|--------|
+| IP server berubah | `bash scripts/reconfigure-host.sh` |
 | Tidak bisa akses dari tablet | Pastikan tablet & server satu WiFi; cek firewall port 80 |
 | Gambar produk tidak muncul | `docker compose exec backend php artisan storage:link` |
 | Email tidak terkirim | Pengaturan → Integrasi → Gateway Email (SMTP) |
