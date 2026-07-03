@@ -36,6 +36,7 @@ services:
     build:
       context: ..
       dockerfile: docker/backend/Dockerfile
+    image: creativepos-backend:latest
     container_name: creativepos-backend
     restart: unless-stopped
     volumes:
@@ -47,10 +48,17 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8000/up"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 40s
     networks:
       - creativepos
 
   reverb:
+    image: creativepos-backend:latest
     build:
       context: ..
       dockerfile: docker/backend/Dockerfile
@@ -60,11 +68,16 @@ services:
     env_file:
       - ../backend/.env
     depends_on:
-      - redis
+      backend:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     networks:
       - creativepos
 
   horizon:
+    profiles: ["workers"]
+    image: creativepos-backend:latest
     build:
       context: ..
       dockerfile: docker/backend/Dockerfile
@@ -74,12 +87,18 @@ services:
     env_file:
       - ../backend/.env
     depends_on:
-      - redis
-      - mysql
+      backend:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
     networks:
       - creativepos
 
   scheduler:
+    profiles: ["workers"]
+    image: creativepos-backend:latest
     build:
       context: ..
       dockerfile: docker/backend/Dockerfile
@@ -89,7 +108,8 @@ services:
     env_file:
       - ../backend/.env
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
     networks:
       - creativepos
 

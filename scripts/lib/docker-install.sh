@@ -78,6 +78,17 @@ cache_config_safe() {
   fi
 }
 
+start_core_services() {
+  echo "Menjalankan layanan inti (database, API, web, websocket)..."
+  dc up -d --build mysql redis backend frontend reverb nginx
+}
+
+start_worker_services() {
+  echo "Menjalankan worker (horizon, scheduler)..."
+  dc --profile workers up -d horizon scheduler 2>/dev/null \
+    || dc up -d horizon scheduler
+}
+
 show_failed_logs() {
   echo "" >&2
   echo "=== Log container (untuk diagnosa) ===" >&2
@@ -85,5 +96,7 @@ show_failed_logs() {
   dc logs --tail=50 nginx >&2 || true
   dc logs --tail=50 backend >&2 || true
   dc logs --tail=50 frontend >&2 || true
+  dc logs --tail=30 mysql >&2 || true
   echo "Jalankan: bash scripts/diagnose-install.sh" >&2
+  echo "Perbaikan: sudo bash scripts/fix-install.sh" >&2
 }

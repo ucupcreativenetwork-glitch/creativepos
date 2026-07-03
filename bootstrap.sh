@@ -51,6 +51,7 @@ fi
 
 echo "[3/4] Install CreativePOS..."
 export SKIP_PREREQS=1
+export CREATIVEPOS_NO_PROMPT=1
 cd "$INSTALL_DIR"
 chmod +x install.sh scripts/*.sh 2>/dev/null || true
 bash install.sh "$APP_HOST" "$APP_PORT"

@@ -31,13 +31,14 @@ rm -f "$ROOT/backend/bootstrap/cache/config.php" \
 export DOCKER_COMPOSE_FILE="$ROOT/docker/docker-compose.client.yml"
 cd docker
 echo "Membangun ulang container..."
-dc up -d --build
+start_core_services
 
 wait_for_mysql
 wait_for_backend
 
 run_migrate 0
 cache_config_safe
+start_worker_services || true
 docker compose -f docker-compose.client.yml exec -T backend php artisan view:cache 2>/dev/null || true
 
 cd "$ROOT"

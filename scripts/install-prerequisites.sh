@@ -45,7 +45,36 @@ apt-get install -y -qq \
   git \
   lsb-release \
   apt-transport-https \
-  software-properties-common
+  software-properties-common \
+  openssl
+
+ensure_swap() {
+  local mem_mb swap_mb
+  mem_mb="$(awk '/MemTotal/ {print int($2/1024)}' /proc/meminfo 2>/dev/null || echo 4096)"
+  swap_mb="$(awk '/SwapTotal/ {print int($2/1024)}' /proc/meminfo 2>/dev/null || echo 0)"
+
+  if [[ "$mem_mb" -ge 3500 && "$swap_mb" -ge 1024 ]]; then
+    return 0
+  fi
+  if [[ "$swap_mb" -ge 2048 ]]; then
+    return 0
+  fi
+  if [[ -f /swapfile ]] || swapon --show 2>/dev/null | grep -q '/swapfile'; then
+    return 0
+  fi
+
+  echo "RAM ${mem_mb}MB — membuat swap 2GB agar build Docker tidak gagal..."
+  fallocate -l 2G /swapfile 2>/dev/null || dd if=/dev/zero of=/swapfile bs=1M count=2048 status=progress
+  chmod 600 /swapfile
+  mkswap /swapfile
+  swapon /swapfile
+  if ! grep -q '/swapfile' /etc/fstab 2>/dev/null; then
+    echo '/swapfile none swap sw 0 0' >>/etc/fstab
+  fi
+  echo "Swap aktif: $(swapon --show | tail -1)"
+}
+
+ensure_swap
 
 if ! command -v docker >/dev/null 2>&1; then
   echo "Menginstall Docker Engine + Compose plugin..."
