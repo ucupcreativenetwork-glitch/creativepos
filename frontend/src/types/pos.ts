@@ -111,6 +111,7 @@ export interface PosTransaction {
   }[];
   completed_at?: string;
   created_at?: string;
+  wifi?: { ssid: string; password: string } | null;
 }
 
 export interface CreateTransactionPayload {

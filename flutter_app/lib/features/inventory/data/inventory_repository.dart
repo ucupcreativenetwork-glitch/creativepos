@@ -163,6 +163,21 @@ class InventoryRepository {
     );
   }
 
+  Future<InventoryProduct> generateBarcode({
+    required int id,
+    String? uuid,
+    bool force = false,
+  }) async {
+    final identifier = uuid != null && uuid.isNotEmpty ? uuid : id.toString();
+    final response = await _dio.postApi<InventoryProduct>(
+      '${ApiPaths.inventoryProducts}/$identifier/generate-barcode',
+      data: force ? {'force': true} : null,
+      parser: (data) =>
+          InventoryProduct.fromJson(data as Map<String, dynamic>),
+    );
+    return response.data!;
+  }
+
   Future<void> adjustStock({
     required int productId,
     required int warehouseId,

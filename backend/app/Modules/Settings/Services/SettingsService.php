@@ -50,6 +50,9 @@ class SettingsService
             'feature_qr_menu' => (bool) ($settings?->feature_qr_menu ?? true),
             'enabled_payment_methods' => $settings?->enabled_payment_methods ?? [],
             'onboarding_progress' => $settings?->onboarding_progress ?? [],
+            'wifi_ssid' => $settings?->wifi_ssid,
+            'wifi_password' => $settings?->wifi_password,
+            'receipt_show_wifi' => (bool) ($settings?->receipt_show_wifi ?? false),
         ];
     }
 
@@ -72,6 +75,7 @@ class SettingsService
             'service_charge_rate', 'tax_rate', 'timezone', 'currency', 'setup_completed',
             'onboarding_progress', 'enabled_payment_methods',
             'feature_reservations', 'feature_delivery', 'feature_qr_menu',
+            'wifi_ssid', 'wifi_password', 'receipt_show_wifi',
         ])));
 
         return $this->getTenantSettings();

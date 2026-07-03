@@ -11,7 +11,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { getErrorMessage, getFieldErrors } from "@/lib/api/client";
-import { createProduct, getProductCogs, updateProduct } from "@/lib/api/inventory";
+import {
+  createProduct,
+  generateProductBarcode,
+  getProductCogs,
+  updateProduct,
+} from "@/lib/api/inventory";
 import { uploadFile } from "@/lib/api/uploads";
 import { formatCurrency } from "@/lib/utils/format";
 import { resolveMediaUrl } from "@/lib/utils/media";
@@ -78,6 +83,7 @@ export function ProductFormDialog({
 }: ProductFormDialogProps) {
   const isEdit = Boolean(product);
   const [imageUploading, setImageUploading] = useState(false);
+  const [barcodeGenerating, setBarcodeGenerating] = useState(false);
 
   const { data: cogsData } = useQuery({
     queryKey: ["inventory", "product-cogs", product?.uuid],
@@ -230,7 +236,33 @@ export function ProductFormDialog({
             </div>
             <div className="space-y-2">
               <Label htmlFor="barcode">Barcode</Label>
-              <Input id="barcode" {...register("barcode")} />
+              <div className="flex gap-2">
+                <Input id="barcode" className="flex-1" {...register("barcode")} />
+                {isEdit && product && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    disabled={barcodeGenerating}
+                    onClick={async () => {
+                      setBarcodeGenerating(true);
+                      try {
+                        const updated = await generateProductBarcode(
+                          product.uuid || product.id,
+                          Boolean(watch("barcode"))
+                        );
+                        setValue("barcode", updated.barcode ?? "");
+                        toast.success("Barcode berhasil dibuat");
+                      } catch (e) {
+                        toast.error(getErrorMessage(e));
+                      } finally {
+                        setBarcodeGenerating(false);
+                      }
+                    }}
+                  >
+                    {barcodeGenerating ? "..." : "Generate"}
+                  </Button>
+                )}
+              </div>
             </div>
           </div>
 

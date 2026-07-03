@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_colors.dart';
 import '../data/members_repository.dart';
 import '../models/member_models.dart';
+import '../models/member_detail_key.dart';
 import '../providers/members_providers.dart';
 
 Future<bool?> showMemberEditSheet(
@@ -67,7 +68,11 @@ class _MemberEditSheetState extends ConsumerState<MemberEditSheet> {
               'status': _status,
             },
           );
-      ref.invalidate(memberDetailProvider(widget.member.uuid));
+      ref.invalidate(
+        memberDetailProvider(
+          MemberDetailKey(id: widget.member.id, uuid: widget.member.uuid),
+        ),
+      );
       if (!mounted) return;
       Navigator.pop(context, true);
     } catch (e) {

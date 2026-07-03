@@ -56,6 +56,9 @@ class SettingsController extends Controller
             'feature_reservations' => 'sometimes|boolean',
             'feature_delivery' => 'sometimes|boolean',
             'feature_qr_menu' => 'sometimes|boolean',
+            'wifi_ssid' => 'sometimes|nullable|string|max:100',
+            'wifi_password' => 'sometimes|nullable|string|max:100',
+            'receipt_show_wifi' => 'sometimes|boolean',
         ]);
 
         $settings = $this->settingsService->updateTenantSettings($validated);

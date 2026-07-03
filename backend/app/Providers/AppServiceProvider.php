@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Modules\Notification\Services\MailConfigService;
 use App\Shared\Support\FrontendUrl;
 use App\Modules\Inventory\Models\Product;
+use App\Modules\Loyalty\Models\Member;
 use App\Modules\Tenant\Models\Outlet;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -48,6 +49,16 @@ class AppServiceProvider extends ServiceProvider
 
         Route::bind('product', function (string $value): Product {
             $query = Product::query();
+
+            if (is_numeric($value)) {
+                return $query->where('id', (int) $value)->firstOrFail();
+            }
+
+            return $query->where('uuid', $value)->firstOrFail();
+        });
+
+        Route::bind('member', function (string $value): Member {
+            $query = Member::query();
 
             if (is_numeric($value)) {
                 return $query->where('id', (int) $value)->firstOrFail();

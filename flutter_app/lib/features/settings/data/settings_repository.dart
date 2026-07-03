@@ -15,6 +15,9 @@ class TenantSettings {
     this.featureReservations = true,
     this.featureDelivery = true,
     this.featureQrMenu = true,
+    this.wifiSsid,
+    this.wifiPassword,
+    this.receiptShowWifi = false,
   });
 
   final double taxRate;
@@ -23,6 +26,9 @@ class TenantSettings {
   final bool featureReservations;
   final bool featureDelivery;
   final bool featureQrMenu;
+  final String? wifiSsid;
+  final String? wifiPassword;
+  final bool receiptShowWifi;
 
   factory TenantSettings.fromJson(Map<String, dynamic> json) {
     return TenantSettings(
@@ -32,6 +38,9 @@ class TenantSettings {
       featureReservations: json['feature_reservations'] as bool? ?? true,
       featureDelivery: json['feature_delivery'] as bool? ?? true,
       featureQrMenu: json['feature_qr_menu'] as bool? ?? true,
+      wifiSsid: json['wifi_ssid'] as String?,
+      wifiPassword: json['wifi_password'] as String?,
+      receiptShowWifi: json['receipt_show_wifi'] as bool? ?? false,
     );
   }
 
@@ -42,6 +51,9 @@ class TenantSettings {
         'feature_reservations': featureReservations,
         'feature_delivery': featureDelivery,
         'feature_qr_menu': featureQrMenu,
+        'wifi_ssid': wifiSsid,
+        'wifi_password': wifiPassword,
+        'receipt_show_wifi': receiptShowWifi,
       };
 }
 

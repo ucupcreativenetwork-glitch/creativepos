@@ -23,6 +23,7 @@ export interface OfflineReceiptData {
     amount: number;
     payment_method?: { name: string } | null;
   }[];
+  wifi?: { ssid: string; password: string } | null;
 }
 
 export type OfflineReceiptTransaction = OfflineReceiptData &

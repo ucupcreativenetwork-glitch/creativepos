@@ -22,6 +22,7 @@ interface PosReceiptProps {
       amount: number;
       payment_method?: { name: string } | null;
     }[];
+    wifi?: { ssid: string; password: string } | null;
   };
 }
 
@@ -124,6 +125,14 @@ export function PosReceipt({ transaction, pendingSync = false }: PosReceiptProps
               <span>{formatCurrency(payment.amount)}</span>
             </div>
           ))}
+        </div>
+      )}
+
+      {transaction.wifi && (
+        <div className="border-t border-dashed border-border pt-3 text-center text-[10px]">
+          <p className="font-semibold">WiFi Gratis</p>
+          <p>SSID: {transaction.wifi.ssid}</p>
+          <p>Password: {transaction.wifi.password}</p>
         </div>
       )}
 

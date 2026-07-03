@@ -146,6 +146,9 @@ export default function SettingsPage() {
   const [featureReservations, setFeatureReservations] = useState(true);
   const [featureDelivery, setFeatureDelivery] = useState(true);
   const [featureQrMenu, setFeatureQrMenu] = useState(true);
+  const [wifiSsid, setWifiSsid] = useState("");
+  const [wifiPassword, setWifiPassword] = useState("");
+  const [receiptShowWifi, setReceiptShowWifi] = useState(false);
 
   const { hasPackageFeature } = usePackageFeatures();
 
@@ -220,6 +223,9 @@ export default function SettingsPage() {
     setFeatureReservations(tenantSettings.feature_reservations ?? true);
     setFeatureDelivery(tenantSettings.feature_delivery ?? true);
     setFeatureQrMenu(tenantSettings.feature_qr_menu ?? true);
+    setWifiSsid(tenantSettings.wifi_ssid ?? "");
+    setWifiPassword(tenantSettings.wifi_password ?? "");
+    setReceiptShowWifi(tenantSettings.receipt_show_wifi ?? false);
   }, [tenantSettings]);
 
   useEffect(() => {
@@ -281,6 +287,9 @@ export default function SettingsPage() {
         feature_reservations: featureReservations,
         feature_delivery: featureDelivery,
         feature_qr_menu: featureQrMenu,
+        wifi_ssid: wifiSsid || undefined,
+        wifi_password: wifiPassword || undefined,
+        receipt_show_wifi: receiptShowWifi,
       });
     },
     onSuccess: () => {
@@ -573,6 +582,43 @@ export default function SettingsPage() {
                       </span>
                     </label>
                   </div>
+                </div>
+
+                <div className="space-y-3 rounded-lg border border-border p-4">
+                  <div>
+                    <Label>WiFi untuk Pelanggan (cetak di nota)</Label>
+                    <p className="text-xs text-muted-foreground">
+                      SSID dan password akan muncul di struk kasir bila diaktifkan
+                    </p>
+                  </div>
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div>
+                      <Label htmlFor="wifiSsid">Nama WiFi (SSID)</Label>
+                      <Input
+                        id="wifiSsid"
+                        value={wifiSsid}
+                        onChange={(e) => setWifiSsid(e.target.value)}
+                        placeholder="CreativePOS-Guest"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="wifiPassword">Password WiFi</Label>
+                      <Input
+                        id="wifiPassword"
+                        value={wifiPassword}
+                        onChange={(e) => setWifiPassword(e.target.value)}
+                        placeholder="password123"
+                      />
+                    </div>
+                  </div>
+                  <label className="flex cursor-pointer items-center gap-2 text-sm">
+                    <input
+                      type="checkbox"
+                      checked={receiptShowWifi}
+                      onChange={(e) => setReceiptShowWifi(e.target.checked)}
+                    />
+                    Tampilkan WiFi di nota/struk kasir
+                  </label>
                 </div>
 
                 <div className="grid gap-4 sm:grid-cols-2">

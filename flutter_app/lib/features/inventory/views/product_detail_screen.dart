@@ -125,7 +125,50 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
               ),
               const SizedBox(height: 8),
               Text('SKU: ${product.sku}'),
-              if (product.barcode != null) Text('Barcode: ${product.barcode}'),
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      product.barcode != null && product.barcode!.isNotEmpty
+                          ? 'Barcode: ${product.barcode}'
+                          : 'Barcode: belum ada',
+                    ),
+                  ),
+                  TextButton.icon(
+                    onPressed: () async {
+                      try {
+                        final updated = await ref
+                            .read(inventoryRepositoryProvider)
+                            .generateBarcode(
+                              id: product.id,
+                              uuid: product.uuid,
+                              force: product.barcode != null &&
+                                  product.barcode!.isNotEmpty,
+                            );
+                        ref.invalidate(productDetailProvider(_detailKey));
+                        ref.invalidate(inventoryProductsProvider);
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                'Barcode: ${updated.barcode ?? '-'}',
+                              ),
+                            ),
+                          );
+                        }
+                      } catch (e) {
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text(e.toString())),
+                          );
+                        }
+                      }
+                    },
+                    icon: const Icon(Icons.qr_code),
+                    label: const Text('Generate'),
+                  ),
+                ],
+              ),
               const SizedBox(height: 12),
               Text(
                 Formatters.currency(product.basePrice),

@@ -24,6 +24,9 @@ class TenantSetting extends Model
         'feature_reservations',
         'feature_delivery',
         'feature_qr_menu',
+        'wifi_ssid',
+        'wifi_password',
+        'receipt_show_wifi',
     ];
 
     protected function casts(): array
@@ -37,6 +40,7 @@ class TenantSetting extends Model
             'feature_reservations' => 'boolean',
             'feature_delivery' => 'boolean',
             'feature_qr_menu' => 'boolean',
+            'receipt_show_wifi' => 'boolean',
         ];
     }
 

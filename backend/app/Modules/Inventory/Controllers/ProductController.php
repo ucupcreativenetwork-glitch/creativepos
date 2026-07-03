@@ -93,6 +93,18 @@ class ProductController extends Controller
         return ApiResponse::success(null, 'Produk berhasil dihapus.');
     }
 
+    public function generateBarcode(Request $request, Product $product): JsonResponse
+    {
+        $this->authorizePermission($request, 'inventory.update');
+
+        $product = $this->productService->generateBarcode(
+            $product,
+            $request->boolean('force'),
+        );
+
+        return ApiResponse::success(new ProductResource($product), 'Barcode produk berhasil dibuat.');
+    }
+
     public function import(ProductImportRequest $request): JsonResponse
     {
         $this->authorizePermission($request, 'inventory.create');

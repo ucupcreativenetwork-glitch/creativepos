@@ -77,6 +77,17 @@ export async function createProduct(payload: ProductPayload): Promise<Product> {
   return data.data;
 }
 
+export async function generateProductBarcode(
+  productIdOrUuid: string | number,
+  force = false
+): Promise<Product> {
+  const { data } = await apiClient.post<ApiResponse<Product>>(
+    `/inventory/products/${productIdOrUuid}/generate-barcode`,
+    force ? { force: true } : undefined
+  );
+  return data.data;
+}
+
 export async function updateProduct(
   uuid: string,
   payload: Partial<ProductPayload>

@@ -54,7 +54,10 @@ class _MembersTabState extends ConsumerState<MembersTab> {
       if (!mounted) return;
       await Navigator.of(context).push(
         MaterialPageRoute(
-          builder: (_) => MemberDetailScreen(uuid: member.uuid),
+          builder: (_) => MemberDetailScreen(
+            memberId: member.id,
+            memberUuid: member.uuid.isNotEmpty ? member.uuid : null,
+          ),
         ),
       );
     } catch (e) {
@@ -138,8 +141,11 @@ class _MembersTabState extends ConsumerState<MembersTab> {
                   HapticFeedback.lightImpact();
                   Navigator.of(context).push(
                     MaterialPageRoute(
-                      builder: (_) =>
-                          MemberDetailScreen(uuid: member.uuid),
+                      builder: (_) => MemberDetailScreen(
+                        memberId: member.id,
+                        memberUuid:
+                            member.uuid.isNotEmpty ? member.uuid : null,
+                      ),
                     ),
                   );
                 },

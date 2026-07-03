@@ -19,6 +19,7 @@ Route::prefix('inventory')->group(function (): void {
     Route::post('/products', [ProductController::class, 'store']);
     Route::post('/products/import', [ProductController::class, 'import']);
     Route::put('/products/{product}', [ProductController::class, 'update']);
+    Route::post('/products/{product}/generate-barcode', [ProductController::class, 'generateBarcode']);
     Route::delete('/products/{product}', [ProductController::class, 'destroy']);
 
     Route::get('/stocks', [StockController::class, 'index']);

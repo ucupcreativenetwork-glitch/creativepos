@@ -16,6 +16,7 @@ import '../../../services/receipt_builder.dart';
 import '../../auth/providers/auth_providers.dart';
 import '../../standalone/providers/standalone_providers.dart';
 import '../../members/data/members_repository.dart';
+import '../../members/models/member_detail_key.dart';
 import '../../members/models/member_models.dart';
 import '../../members/providers/members_providers.dart';
 import '../../settings/data/settings_repository.dart';
@@ -121,6 +122,9 @@ class _CheckoutSheetState extends ConsumerState<CheckoutSheet> {
     final settings = await _loadSettings(serverUp: isOffline ? false : await _isServerUp());
     final cashierName = ref.read(authControllerProvider).session?.user.name;
 
+    final wifiSsid = settings.receiptShowWifi ? settings.wifiSsid : null;
+    final wifiPassword = settings.receiptShowWifi ? settings.wifiPassword : null;
+
     return ReceiptBuilder.fromCart(
       lines: cart.items
           .map((i) => (name: i.product.name, qty: i.quantity, unitPrice: i.unitPrice))
@@ -136,6 +140,8 @@ class _CheckoutSheetState extends ConsumerState<CheckoutSheet> {
       outletName: outletName,
       cashierName: cashierName,
       isOffline: isOffline,
+      wifiSsid: wifiSsid,
+      wifiPassword: wifiPassword,
     );
   }
 
@@ -157,11 +163,11 @@ class _CheckoutSheetState extends ConsumerState<CheckoutSheet> {
     final serverUp = await _isServerUp();
     final settings = await _loadSettings(serverUp: serverUp);
     PointBalanceDetail? memberPoints;
-    if (cart.memberUuid != null) {
+    if (cart.memberId != null) {
       try {
-        memberPoints = await ref
-            .read(membersRepositoryProvider)
-            .getPoints(cart.memberUuid!);
+        memberPoints = await ref.read(membersRepositoryProvider).getPoints(
+              MemberDetailKey(id: cart.memberId!, uuid: cart.memberUuid),
+            );
       } catch (_) {}
     }
     final manualDiscount = _discountTotal(cart.subtotal);
@@ -327,8 +333,12 @@ class _CheckoutSheetState extends ConsumerState<CheckoutSheet> {
     final isStandalone =
         ref.watch(authControllerProvider).status == AuthStatus.standalone;
     final settings = ref.watch(tenantSettingsProvider);
-    final memberPoints = !isStandalone && cart.memberUuid != null
-        ? ref.watch(memberPointsProvider(cart.memberUuid!))
+    final memberPoints = !isStandalone && cart.memberId != null
+        ? ref.watch(
+            memberPointsProvider(
+              MemberDetailKey(id: cart.memberId!, uuid: cart.memberUuid),
+            ),
+          )
         : null;
     final manualDiscount = settings.maybeWhen(
       data: (_) => _discountTotal(cart.subtotal),

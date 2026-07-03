@@ -14,6 +14,9 @@ export interface TenantSettings {
   feature_reservations?: boolean;
   feature_delivery?: boolean;
   feature_qr_menu?: boolean;
+  wifi_ssid?: string | null;
+  wifi_password?: string | null;
+  receipt_show_wifi?: boolean;
   enabled_payment_methods?: string[];
   onboarding_progress?: Record<string, unknown>;
 }
@@ -33,6 +36,9 @@ export interface TenantSettingsPayload {
   feature_reservations?: boolean;
   feature_delivery?: boolean;
   feature_qr_menu?: boolean;
+  wifi_ssid?: string;
+  wifi_password?: string;
+  receipt_show_wifi?: boolean;
   onboarding_progress?: Record<string, unknown>;
 }
 

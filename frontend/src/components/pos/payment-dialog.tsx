@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { getErrorMessage } from "@/lib/api/client";
 import { findMemberByCode, getMemberPoints, getMembers } from "@/lib/api/members";
 import { createTransaction } from "@/lib/api/pos";
+import { getTenantSettings } from "@/lib/api/settings";
 import { buildOfflineReceipt } from "@/lib/offline/build-offline-receipt";
 import { isNetworkError } from "@/lib/offline/network";
 import { formatCurrency } from "@/lib/utils/format";
@@ -188,6 +189,7 @@ export function PaymentDialog({
       grandTotal: finalTotal,
       paymentMethod,
       outletName,
+      wifi: receiptWifi,
     });
 
     await onEnqueueOffline({
@@ -201,6 +203,23 @@ export function PaymentDialog({
     setIsPendingSync(true);
     onSuccess(receipt.transaction_number, receipt);
   };
+
+  const { data: tenantSettings } = useQuery({
+    queryKey: ["settings", "tenant"],
+    queryFn: getTenantSettings,
+    staleTime: 5 * 60 * 1000,
+    enabled: open,
+  });
+
+  const receiptWifi =
+    tenantSettings?.receipt_show_wifi &&
+    tenantSettings.wifi_ssid &&
+    tenantSettings.wifi_password
+      ? {
+          ssid: tenantSettings.wifi_ssid,
+          password: tenantSettings.wifi_password,
+        }
+      : null;
 
   const stockIssues = items.filter(
     (item) =>

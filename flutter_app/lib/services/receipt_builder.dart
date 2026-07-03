@@ -19,6 +19,8 @@ class ReceiptData {
     this.payments = const [],
     this.completedAt,
     this.isOffline = false,
+    this.wifiSsid,
+    this.wifiPassword,
   });
 
   final String businessName;
@@ -34,6 +36,8 @@ class ReceiptData {
   final List<ReceiptPayment> payments;
   final DateTime? completedAt;
   final bool isOffline;
+  final String? wifiSsid;
+  final String? wifiPassword;
 }
 
 class ReceiptItem {
@@ -134,6 +138,14 @@ class ReceiptBuilder {
     }
 
     if (t.showSeparatorLines) lines.add('--------------------------------');
+    if (data.wifiSsid != null &&
+        data.wifiSsid!.isNotEmpty &&
+        data.wifiPassword != null &&
+        data.wifiPassword!.isNotEmpty) {
+      lines.add('WiFi Gratis');
+      lines.add('SSID: ${data.wifiSsid}');
+      lines.add('Password: ${data.wifiPassword}');
+    }
     if (t.footerMessage.isNotEmpty) lines.add(t.footerMessage);
     if (t.showOutlet && data.outletName != null) lines.add(data.outletName!);
 
@@ -235,6 +247,18 @@ class ReceiptBuilder {
       }
     }
 
+    if (data.wifiSsid != null &&
+        data.wifiSsid!.isNotEmpty &&
+        data.wifiPassword != null &&
+        data.wifiPassword!.isNotEmpty) {
+      if (t.showSeparatorLines) bytes.addAll(generator.hr());
+      bytes.addAll(generator.text(
+        'WiFi Gratis',
+        styles: const PosStyles(align: PosAlign.center, bold: true),
+      ));
+      bytes.addAll(generator.text('SSID: ${data.wifiSsid}'));
+      bytes.addAll(generator.text('Password: ${data.wifiPassword}'));
+    }
     if (t.showSeparatorLines) bytes.addAll(generator.hr());
     if (t.footerMessage.isNotEmpty) {
       bytes.addAll(generator.text(
@@ -289,6 +313,8 @@ class ReceiptBuilder {
         })
         .toList();
 
+    final wifi = json['wifi'] as Map<String, dynamic>?;
+
     return ReceiptData(
       businessName: outlet?['name'] as String? ?? 'CreativePOS',
       outletName: outlet?['name'] as String?,
@@ -304,6 +330,8 @@ class ReceiptBuilder {
       completedAt: json['completed_at'] != null
           ? DateTime.tryParse(json['completed_at'] as String)
           : null,
+      wifiSsid: wifi?['ssid'] as String?,
+      wifiPassword: wifi?['password'] as String?,
     );
   }
 
@@ -320,6 +348,8 @@ class ReceiptBuilder {
     String? outletName,
     String? cashierName,
     bool isOffline = false,
+    String? wifiSsid,
+    String? wifiPassword,
   }) {
     final items = lines
         .map(
@@ -345,6 +375,8 @@ class ReceiptBuilder {
       grandTotal: grandTotal,
       payments: [ReceiptPayment(name: paymentMethodName, amount: grandTotal)],
       isOffline: isOffline,
+      wifiSsid: wifiSsid,
+      wifiPassword: wifiPassword,
     );
   }
 

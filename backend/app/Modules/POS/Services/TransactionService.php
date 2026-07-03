@@ -15,6 +15,7 @@ use App\Modules\POS\Models\SalePayment;
 use App\Modules\POS\Models\SaleTransaction;
 use App\Modules\POS\Models\SaleTransactionItem;
 use App\Modules\POS\Models\Shift;
+use App\Modules\Tenant\Models\TenantSetting;
 use App\Modules\Notification\Services\StockAlertService;
 use App\Modules\Loyalty\Models\PointTransaction;
 use App\Modules\POS\Repositories\TransactionRepository;
@@ -198,6 +199,22 @@ class TransactionService
             'payments.paymentMethod:id,name,code',
         ]);
 
+        $tenantSettings = TenantSetting::query()
+            ->where('tenant_id', $transaction->tenant_id)
+            ->first();
+
+        $receiptWifi = null;
+        if (
+            $tenantSettings?->receipt_show_wifi
+            && filled($tenantSettings->wifi_ssid)
+            && filled($tenantSettings->wifi_password)
+        ) {
+            $receiptWifi = [
+                'ssid' => $tenantSettings->wifi_ssid,
+                'password' => $tenantSettings->wifi_password,
+            ];
+        }
+
         return [
             'transaction_number' => $transaction->transaction_number,
             'outlet' => $transaction->outlet,
@@ -220,6 +237,7 @@ class TransactionService
             'service_charge' => (float) $transaction->service_charge,
             'grand_total' => (float) $transaction->grand_total,
             'completed_at' => $transaction->completed_at?->toIso8601String(),
+            'wifi' => $receiptWifi,
         ];
     }
 

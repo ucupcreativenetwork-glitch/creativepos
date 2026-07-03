@@ -7,6 +7,7 @@ interface BuildOfflineReceiptParams {
   paymentMethod?: PaymentMethod | null;
   outletName?: string;
   cashierName?: string;
+  wifi?: { ssid: string; password: string } | null;
 }
 
 export function buildOfflineTransactionNumber(): string {
@@ -57,5 +58,6 @@ export function buildOfflineReceipt(
           : { name: "Offline" },
       },
     ],
+    wifi: params.wifi ?? null,
   };
 }

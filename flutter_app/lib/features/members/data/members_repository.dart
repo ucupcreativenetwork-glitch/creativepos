@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/constants/api_paths.dart';
 import '../../../core/network/dio_client.dart';
 import '../../../shared/models/api_response.dart';
+import '../models/member_detail_key.dart';
 import '../models/member_models.dart';
 
 class MembersRepository {
@@ -28,9 +29,13 @@ class MembersRepository {
     );
   }
 
-  Future<MemberModel> getMember(String uuid) async {
+  Future<MemberModel> getMemberDetail({
+    required int id,
+    String? uuid,
+  }) async {
+    final identifier = uuid != null && uuid.isNotEmpty ? uuid : id.toString();
     final response = await _dio.getApi<MemberModel>(
-      '${ApiPaths.members}/$uuid',
+      '${ApiPaths.members}/$identifier',
       parser: (data) => MemberModel.fromJson(data as Map<String, dynamic>),
     );
     return response.data!;
@@ -73,9 +78,9 @@ class MembersRepository {
     return response.data!;
   }
 
-  Future<PointBalanceDetail> getPoints(String uuid) async {
+  Future<PointBalanceDetail> getPoints(MemberDetailKey key) async {
     final response = await _dio.getApi<PointBalanceDetail>(
-      '${ApiPaths.members}/$uuid/points',
+      '${ApiPaths.members}/${key.pathSegment}/points',
       parser: (data) =>
           PointBalanceDetail.fromJson(data as Map<String, dynamic>),
     );
@@ -83,12 +88,12 @@ class MembersRepository {
   }
 
   Future<void> redeemPoints(
-    String uuid, {
+    MemberDetailKey key, {
     required int points,
     String? description,
   }) async {
     await _dio.postApi(
-      '${ApiPaths.members}/$uuid/points/redeem',
+      '${ApiPaths.members}/${key.pathSegment}/points/redeem',
       data: {
         'points': points,
         if (description != null) 'description': description,
@@ -111,11 +116,11 @@ class MembersRepository {
   }
 
   Future<List<WalletTransaction>> getWalletTransactions(
-    String memberUuid, {
+    MemberDetailKey key, {
     int page = 1,
   }) async {
     final result = await _dio.getPaginatedApi<WalletTransaction>(
-      ApiPaths.walletTransactions(memberUuid),
+      ApiPaths.walletTransactions(key.pathSegment),
       queryParameters: {'page': page, 'per_page': 20},
       itemParser: WalletTransaction.fromJson,
     );

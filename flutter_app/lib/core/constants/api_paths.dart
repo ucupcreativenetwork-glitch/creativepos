@@ -41,6 +41,9 @@ abstract final class ApiPaths {
   static const inventoryStockAdjustment = '/inventory/stocks/adjustment';
   static const inventoryCategories = '/inventory/categories';
 
+  static String inventoryGenerateBarcode(String productIdOrUuid) =>
+      '/inventory/products/$productIdOrUuid/generate-barcode';
+
   // Members
   static const members = '/members';
   static const membersTiers = '/members/tiers';

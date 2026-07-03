@@ -4,19 +4,30 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../shared/widgets/error_view.dart';
 import '../data/members_repository.dart';
+import '../models/member_detail_key.dart';
 import '../providers/members_providers.dart';
 import 'member_edit_sheet.dart';
 
 class MemberDetailScreen extends ConsumerWidget {
-  const MemberDetailScreen({super.key, required this.uuid});
+  const MemberDetailScreen({
+    super.key,
+    required this.memberId,
+    this.memberUuid,
+  });
 
-  final String uuid;
+  final int memberId;
+  final String? memberUuid;
+
+  MemberDetailKey get _detailKey => MemberDetailKey(
+        id: memberId,
+        uuid: memberUuid,
+      );
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final member = ref.watch(memberDetailProvider(uuid));
-    final points = ref.watch(memberPointsProvider(uuid));
-    final walletTx = ref.watch(memberWalletTransactionsProvider(uuid));
+    final member = ref.watch(memberDetailProvider(_detailKey));
+    final points = ref.watch(memberPointsProvider(_detailKey));
+    final walletTx = ref.watch(memberWalletTransactionsProvider(_detailKey));
 
     return Scaffold(
       appBar: AppBar(
@@ -27,7 +38,7 @@ class MemberDetailScreen extends ConsumerWidget {
               onPressed: () async {
                 final ok = await showMemberEditSheet(context, member: m);
                 if (ok == true) {
-                  ref.invalidate(memberDetailProvider(uuid));
+                  ref.invalidate(memberDetailProvider(_detailKey));
                 }
               },
               icon: const Icon(Icons.edit_outlined),
@@ -40,17 +51,19 @@ class MemberDetailScreen extends ConsumerWidget {
       body: member.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => ErrorView(
-          message: e.toString(),
+          message: e.toString().contains('Resource not found')
+              ? 'Member tidak ditemukan. Coba refresh daftar member.'
+              : e.toString(),
           onRetry: () {
-            ref.invalidate(memberDetailProvider(uuid));
-            ref.invalidate(memberPointsProvider(uuid));
+            ref.invalidate(memberDetailProvider(_detailKey));
+            ref.invalidate(memberPointsProvider(_detailKey));
           },
         ),
         data: (m) => RefreshIndicator(
           onRefresh: () async {
-            ref.invalidate(memberDetailProvider(uuid));
-            ref.invalidate(memberPointsProvider(uuid));
-            ref.invalidate(memberWalletTransactionsProvider(uuid));
+            ref.invalidate(memberDetailProvider(_detailKey));
+            ref.invalidate(memberPointsProvider(_detailKey));
+            ref.invalidate(memberWalletTransactionsProvider(_detailKey));
           },
           child: ListView(
             padding: const EdgeInsets.all(16),
@@ -167,7 +180,8 @@ class MemberDetailScreen extends ConsumerWidget {
               if (m.points != null && m.points!.balance > 0) ...[
                 const SizedBox(height: 12),
                 OutlinedButton.icon(
-                  onPressed: () => _redeemPoints(context, ref, uuid, m.points!.balance),
+                  onPressed: () =>
+                      _redeemPoints(context, ref, _detailKey, m.points!.balance),
                   icon: const Icon(Icons.redeem_outlined),
                   label: const Text('Tukar Poin'),
                 ),
@@ -226,7 +240,7 @@ class MemberDetailScreen extends ConsumerWidget {
             memberId: memberId,
             amount: amount,
           );
-      ref.invalidate(memberDetailProvider(uuid));
+      ref.invalidate(memberDetailProvider(_detailKey));
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Top-up berhasil')),
@@ -244,7 +258,7 @@ class MemberDetailScreen extends ConsumerWidget {
   Future<void> _redeemPoints(
     BuildContext context,
     WidgetRef ref,
-    String memberUuid,
+    MemberDetailKey key,
     int maxPoints,
   ) async {
     final pointsController = TextEditingController();
@@ -278,11 +292,11 @@ class MemberDetailScreen extends ConsumerWidget {
 
     try {
       await ref.read(membersRepositoryProvider).redeemPoints(
-            memberUuid,
+            key,
             points: points,
           );
-      ref.invalidate(memberDetailProvider(uuid));
-      ref.invalidate(memberPointsProvider(uuid));
+      ref.invalidate(memberDetailProvider(key));
+      ref.invalidate(memberPointsProvider(key));
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Poin berhasil ditukar')),

@@ -8,6 +8,7 @@ use App\Modules\Inventory\Models\ProductModifierGroup;
 use App\Modules\Inventory\Repositories\ProductRepository;
 use App\Modules\Inventory\Repositories\StockRepository;
 use App\Shared\Services\PackageLimitService;
+use App\Shared\Support\BarcodeGenerator;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class ProductService
@@ -176,6 +177,33 @@ class ProductService
             ->where('group_id', $group->id)
             ->when($keptModifierIds !== [], fn ($q) => $q->whereNotIn('id', $keptModifierIds))
             ->delete();
+    }
+
+    public function generateBarcode(Product $product, bool $force = false): Product
+    {
+        if (! $force && filled($product->barcode)) {
+            return $this->repository->findWithRelations($product->uuid);
+        }
+
+        $generator = app(BarcodeGenerator::class);
+        $attempts = 0;
+
+        do {
+            $barcode = $attempts === 0
+                ? $generator->generateForProduct($product)
+                : $generator->withEan13CheckDigit(
+                    str_pad((string) random_int(0, 999999999999), 12, '0', STR_PAD_LEFT)
+                );
+            $attempts++;
+        } while (! $generator->isUniqueInTenant($barcode, $product->id) && $attempts < 8);
+
+        if (! $generator->isUniqueInTenant($barcode, $product->id)) {
+            abort(422, 'Gagal membuat barcode unik. Coba lagi.');
+        }
+
+        $this->repository->update($product, ['barcode' => $barcode]);
+
+        return $this->repository->findWithRelations($product->uuid);
     }
 
     public function delete(Product $product): bool

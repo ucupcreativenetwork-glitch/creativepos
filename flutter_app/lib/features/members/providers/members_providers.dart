@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../data/members_repository.dart';
+import '../models/member_detail_key.dart';
 import '../models/member_models.dart';
 
 class MembersQuery {
@@ -29,21 +30,26 @@ final membersListProvider = FutureProvider.autoDispose
 );
 
 final memberDetailProvider =
-    FutureProvider.autoDispose.family<MemberModel, String>((ref, uuid) async {
-  return ref.watch(membersRepositoryProvider).getMember(uuid);
-});
+    FutureProvider.autoDispose.family<MemberModel, MemberDetailKey>(
+  (ref, key) async {
+    return ref.watch(membersRepositoryProvider).getMemberDetail(
+          id: key.id,
+          uuid: key.uuid,
+        );
+  },
+);
 
 final memberPointsProvider =
-    FutureProvider.autoDispose.family<PointBalanceDetail, String>(
-  (ref, uuid) async {
-    return ref.watch(membersRepositoryProvider).getPoints(uuid);
+    FutureProvider.autoDispose.family<PointBalanceDetail, MemberDetailKey>(
+  (ref, key) async {
+    return ref.watch(membersRepositoryProvider).getPoints(key);
   },
 );
 
 final memberWalletTransactionsProvider =
-    FutureProvider.autoDispose.family<List<WalletTransaction>, String>(
-  (ref, uuid) async {
-    return ref.watch(membersRepositoryProvider).getWalletTransactions(uuid);
+    FutureProvider.autoDispose.family<List<WalletTransaction>, MemberDetailKey>(
+  (ref, key) async {
+    return ref.watch(membersRepositoryProvider).getWalletTransactions(key);
   },
 );
 
