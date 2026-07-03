@@ -8,6 +8,7 @@ const PUBLIC_ROUTES = [
   "/reset-password",
   "/two-factor",
   "/verify-email",
+  "/change-password",
 ];
 
 const AUTH_ROUTES = [
@@ -19,7 +20,10 @@ const AUTH_ROUTES = [
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const token = request.cookies.get("auth_token")?.value;
+  const rawToken = request.cookies.get("auth_token")?.value;
+  const token = rawToken
+    ? decodeURIComponent(rawToken)
+    : undefined;
 
   const isPublicRoute = PUBLIC_ROUTES.some(
     (route) => pathname === route || pathname.startsWith(`${route}/`)
@@ -40,7 +44,8 @@ export function middleware(request: NextRequest) {
     pathname.startsWith("/delivery") ||
     pathname.startsWith("/kasir");
 
-  if (token && isAuthRoute) {
+  // Always allow /login so users can sign in again (stale cookie fix).
+  if (token && isAuthRoute && pathname !== "/login") {
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 

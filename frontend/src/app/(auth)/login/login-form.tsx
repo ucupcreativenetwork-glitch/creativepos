@@ -7,7 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useMutation } from "@tanstack/react-query";
 import { Eye, EyeOff, LogIn } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -40,7 +40,11 @@ export function LoginForm() {
   const searchParams = useSearchParams();
   const redirect = searchParams.get("redirect") ?? "/dashboard";
   const [showPassword, setShowPassword] = useState(false);
-  const { setAuth, setPending2fa } = useAuthStore();
+  const { setAuth, setPending2fa, clearAuth } = useAuthStore();
+
+  useEffect(() => {
+    clearAuth();
+  }, [clearAuth]);
 
   const {
     register,
