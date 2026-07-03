@@ -13,6 +13,8 @@ SKIP_SEED="${SKIP_SEED:-0}"
 
 # shellcheck source=lib/resolve-app-host.sh
 source "$SCRIPT_DIR/lib/resolve-app-host.sh"
+# shellcheck source=lib/docker-install.sh
+source "$SCRIPT_DIR/lib/docker-install.sh"
 resolve_app_host "$ROOT" "$CLI_HOST" "$CLI_PORT"
 
 APP_HOST="$RESOLVED_HOST"
@@ -61,6 +63,12 @@ DB_PASS="$(grep -E '^DB_PASSWORD=' "$ROOT/docker/.env" | cut -d= -f2- | tr -d '\
 [[ -n "$DB_USER" ]] && sed -i "s/^DB_USERNAME=.*/DB_USERNAME=${DB_USER}/" "$ROOT/backend/.env"
 [[ -n "$DB_PASS" ]] && sed -i "s/^DB_PASSWORD=.*/DB_PASSWORD=${DB_PASS}/" "$ROOT/backend/.env"
 sed -i "s|^FRONTEND_URL=.*|FRONTEND_URL=${APP_URL}|" "$ROOT/backend/.env"
+sed -i 's/^MAIL_MAILER=.*/MAIL_MAILER=log/' "$ROOT/backend/.env"
+if grep -q '^TRUSTED_PROXIES=' "$ROOT/backend/.env"; then
+  sed -i 's/^TRUSTED_PROXIES=.*/TRUSTED_PROXIES=*/' "$ROOT/backend/.env"
+else
+  echo 'TRUSTED_PROXIES=*' >> "$ROOT/backend/.env"
+fi
 sed -i "s/^SANCTUM_STATEFUL_DOMAINS=.*/SANCTUM_STATEFUL_DOMAINS=${APP_HOST},localhost,127.0.0.1/" "$ROOT/backend/.env"
 sed -i "s/^REVERB_HOST=.*/REVERB_HOST=${APP_HOST}/" "$ROOT/backend/.env"
 sed -i "s/^REVERB_PORT=.*/REVERB_PORT=${APP_PORT}/" "$ROOT/backend/.env"
@@ -73,31 +81,32 @@ cat > "$ROOT/frontend/.env.local" <<EOF
 NEXT_PUBLIC_API_URL=/api/v1
 EOF
 
+rm -f "$ROOT/backend/bootstrap/cache/config.php" \
+      "$ROOT/backend/bootstrap/cache/routes-v7.php" \
+      "$ROOT/backend/bootstrap/cache/services.php" 2>/dev/null || true
+
+export DOCKER_COMPOSE_FILE="$ROOT/docker/docker-compose.client.yml"
 cd "$ROOT/docker"
 
 echo "Membangun dan menjalankan container..."
-docker compose -f docker-compose.client.yml up -d --build
-
-echo "Menunggu MySQL siap..."
-for i in $(seq 1 45); do
-  if docker compose -f docker-compose.client.yml exec -T mysql mysqladmin ping -h localhost --silent 2>/dev/null; then
-    echo "MySQL siap."
-    break
-  fi
-  sleep 2
-done
-
-docker compose -f docker-compose.client.yml exec -T backend php artisan key:generate --force
-docker compose -f docker-compose.client.yml exec -T backend php artisan storage:link --force || true
-
-if [[ "$SKIP_SEED" == "1" ]]; then
-  docker compose -f docker-compose.client.yml exec -T backend php artisan migrate --force
-else
-  docker compose -f docker-compose.client.yml exec -T backend php artisan migrate --seed --force
+if ! dc up -d --build; then
+  show_failed_logs
+  exit 1
 fi
 
-docker compose -f docker-compose.client.yml exec -T backend php artisan config:cache
-docker compose -f docker-compose.client.yml exec -T backend php artisan route:cache
+wait_for_mysql || { show_failed_logs; exit 1; }
+wait_for_backend || { show_failed_logs; exit 1; }
+
+dc exec -T backend php artisan key:generate --force
+dc exec -T backend php artisan storage:link --force || true
+
+if [[ "$SKIP_SEED" == "1" ]]; then
+  run_migrate 0 || { show_failed_logs; exit 1; }
+else
+  run_migrate 1 || { show_failed_logs; exit 1; }
+fi
+
+cache_config_safe
 
 echo ""
 echo "=== Instalasi selesai ==="

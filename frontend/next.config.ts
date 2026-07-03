@@ -4,7 +4,8 @@ import { pwaRuntimeCaching } from "./src/config/pwa-runtime-caching";
 
 const withPWA = withPWAInit({
   dest: "public",
-  disable: process.env.NODE_ENV === "development",
+  disable:
+    process.env.NODE_ENV === "development" || process.env.DOCKER_BUILD === "1",
   register: true,
   reloadOnOnline: true,
   cacheOnFrontEndNav: true,

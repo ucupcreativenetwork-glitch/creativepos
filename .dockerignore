@@ -1,0 +1,41 @@
+# Perkecil build context & hindari file dev masuk image
+.git
+.github
+.idea
+.vscode
+
+# Dependencies (di-install ulang di Dockerfile)
+**/node_modules
+**/vendor
+**/.next
+**/dist
+**/build
+
+# Flutter / mobile (tidak dipakai image web/backend)
+flutter_app/
+mobile/
+*.apk
+*.aab
+
+# Dev & cache
+**/.env
+**/.env.local
+!**/.env.example
+backend/storage/logs/*
+backend/storage/framework/cache/*
+backend/storage/framework/sessions/*
+backend/storage/framework/views/*
+backend/bootstrap/cache/*.php
+!backend/bootstrap/cache/.gitignore
+
+# Test & docs
+**/.phpunit.cache
+**/coverage
+docs/
+*.md
+!README.md
+
+# Gradle / pub
+.gradle-home/
+.pub-cache/
+.dart_tool/

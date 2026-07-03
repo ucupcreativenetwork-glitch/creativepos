@@ -100,13 +100,22 @@ git clone https://${GITHUB_TOKEN}@github.com/ucupcreativenetwork-glitch/creative
 
 ---
 
+## Instalasi gagal / banyak error?
+
+```bash
+cd /opt/creativepos
+sudo bash scripts/diagnose-install.sh   # lihat penyebab error
+sudo bash scripts/fix-install.sh        # perbaiki otomatis
+```
+
 ## Troubleshooting
 
 | Masalah | Solusi |
 |---------|--------|
+| Build Docker gagal / OOM | VPS minimal 4GB RAM; jalankan `fix-install.sh` |
 | Login web gagal | Hard refresh `Ctrl+Shift+R`, pastikan akses via IP server bukan localhost |
-| Perangkat tidak muncul di Remote Center | Login dulu di HP/Web, tunggu 1–2 menit |
-| Migrate error | `php artisan migrate --force` manual di container backend |
+| Migrate error | `sudo bash scripts/fix-install.sh` |
+| Port 80 bentrok | `sudo ss -tlnp \| grep :80` |
 | APK tidak update | Build APK baru lalu publish via Platform Admin → Upload APK |
 
 **Akses dari internet (Cloudflare):** [DEPLOY-CLOUDFLARE.md](./DEPLOY-CLOUDFLARE.md)

@@ -40,7 +40,6 @@ services:
     restart: unless-stopped
     volumes:
       - ../backend/storage:/var/www/html/storage
-      - ../backend/bootstrap/cache:/var/www/html/bootstrap/cache
     env_file:
       - ../backend/.env
     depends_on:
