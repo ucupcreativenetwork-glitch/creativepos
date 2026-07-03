@@ -60,7 +60,6 @@ class DefaultAccountsSeeder extends Seeder
             ]);
         }
 
-        $this->assignRole($user, 'super-admin');
     }
 
     protected function seedDemoTenantWithAdmin(): void
@@ -173,6 +172,7 @@ class DefaultAccountsSeeder extends Seeder
         $this->assignRole($admin, 'manager');
 
         $this->linkSuperAdminToDemoTenant($tenant, $outlet);
+        $this->assignSuperAdminRole();
     }
 
     protected function linkSuperAdminToDemoTenant(Tenant $tenant, Outlet $outlet): void
@@ -241,6 +241,20 @@ class DefaultAccountsSeeder extends Seeder
         }
     }
 
+    protected function assignSuperAdminRole(): void
+    {
+        $email = strtolower(env('CREATIVEPOS_SUPER_ADMIN_EMAIL', 'superadmin@creativepos.local'));
+
+        $user = User::query()
+            ->where('email', $email)
+            ->where('is_super_admin', true)
+            ->first();
+
+        if ($user !== null && $user->tenant_id) {
+            $this->assignRole($user, 'super-admin');
+        }
+    }
+
     protected function assignRole(User $user, string $roleName): void
     {
         $role = Role::query()
@@ -248,8 +262,11 @@ class DefaultAccountsSeeder extends Seeder
             ->whereNull('tenant_id')
             ->first();
 
-        if ($role !== null) {
-            $user->syncRoles([$role]);
+        if ($role === null || $user->tenant_id === null) {
+            return;
         }
+
+        setPermissionsTeamId($user->tenant_id);
+        $user->syncRoles([$role]);
     }
 }
