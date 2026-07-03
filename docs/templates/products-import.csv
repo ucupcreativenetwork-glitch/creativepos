@@ -1,0 +1,5 @@
+name,sku,base_price,cost_price,barcode,category_name,initial_stock,min_stock,track_stock
+Nasi Goreng Spesial,NGS-001,25000,10000,8991234567890,Makanan,50,10,1
+Es Teh Manis,ETM-001,8000,2000,8991234567891,Minuman,100,20,1
+Ayam Bakar,ABK-001,35000,15000,8991234567892,Makanan,30,5,1
+Kopi Susu,KPS-001,18000,6000,8991234567893,Minuman,40,10,1
