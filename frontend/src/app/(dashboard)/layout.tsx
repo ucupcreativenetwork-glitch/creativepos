@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { OnboardingGate } from "@/components/onboarding/onboarding-gate";
 import { MobileBottomNav } from "@/components/layout/mobile-bottom-nav";
 import { NotificationBell } from "@/components/notifications/notification-bell";
+import { useAuthHydrated } from "@/hooks/useAuthHydrated";
 import { useDashboardNav } from "@/hooks/useDashboardNav";
 
 export default function DashboardLayout({
@@ -23,6 +24,7 @@ export default function DashboardLayout({
 }) {
   const pathname = usePathname();
   const router = useRouter();
+  const authHydrated = useAuthHydrated();
   const { user, tenant, clearAuth } = useAuthStore();
   const navItems = useDashboardNav();
   const mustChangePassword = !!user?.must_change_password;
@@ -76,7 +78,7 @@ export default function DashboardLayout({
           <NotificationBell />
         </div>
 
-        {tenant && (
+        {authHydrated && tenant && (
           <div className="border-b border-border px-4 py-3">
             <p className="truncate text-xs text-muted-foreground">Bisnis</p>
             <p className="truncate text-sm font-medium">{tenant.name}</p>
@@ -107,7 +109,7 @@ export default function DashboardLayout({
         </nav>
 
         <div className="border-t border-border p-4">
-          {user && (
+          {authHydrated && user && (
             <div className="mb-3 flex items-center gap-3">
               <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary">
                 {getInitials(user.name)}

@@ -2,6 +2,7 @@
 
 import { Shield } from "lucide-react";
 import { useMemo } from "react";
+import { useAuthHydrated } from "@/hooks/useAuthHydrated";
 import { usePackageFeatures } from "@/hooks/usePackageFeatures";
 import {
   DASHBOARD_NAV_ITEMS,
@@ -18,11 +19,16 @@ const platformNavItem: DashboardNavItem = {
 };
 
 export function useDashboardNav(options?: { mobileOnly?: boolean }) {
+  const hydrated = useAuthHydrated();
   const user = useAuthStore((s) => s.user);
   const hasPermission = useAuthStore((s) => s.hasPermission);
   const { hasFeature } = usePackageFeatures();
 
   const navItems = useMemo(() => {
+    if (!hydrated) {
+      return [];
+    }
+
     const items = user?.is_super_admin
       ? [...DASHBOARD_NAV_ITEMS, platformNavItem]
       : DASHBOARD_NAV_ITEMS;
@@ -46,7 +52,13 @@ export function useDashboardNav(options?: { mobileOnly?: boolean }) {
 
       return true;
     });
-  }, [user?.is_super_admin, hasFeature, hasPermission, options?.mobileOnly]);
+  }, [
+    hydrated,
+    user?.is_super_admin,
+    hasFeature,
+    hasPermission,
+    options?.mobileOnly,
+  ]);
 
   return navItems;
 }

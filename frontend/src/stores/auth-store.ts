@@ -83,6 +83,8 @@ export const useAuthStore = create<AuthState>()(
     }),
     {
       name: "creativepos-auth",
+      // Defer localStorage read to client effect — prevents SSR/client HTML mismatch.
+      skipHydration: true,
       partialize: (state) => ({
         user: state.user,
         tenant: state.tenant,
