@@ -68,10 +68,23 @@ cd D:\creativepos
 powershell -ExecutionPolicy Bypass -File install.ps1 -AppHost 10.110.1.15
 ```
 
-### Update
+### Update server (sudah terinstall)
 
 ```bash
+# Linux (Docker)
 cd /opt/creativepos && sudo bash update.sh
+```
+
+```powershell
+# Windows Server (Docker)
+cd D:\creativepos
+powershell -ExecutionPolicy Bypass -File update.ps1
+```
+
+```powershell
+# Komputer development lokal (XAMPP / tanpa Docker)
+cd D:\pos
+powershell -ExecutionPolicy Bypass -File scripts\update-dev.ps1
 ```
 
 | Setelah install | URL / Akun |
@@ -80,11 +93,14 @@ cd /opt/creativepos && sudo bash update.sh
 | Admin Toko | `admin@creativepos.local` / `Admin123!` |
 | Super Admin | `superadmin@creativepos.local` / `SuperAdmin123!` |
 | Web POS | `http://IP-SERVER/pos` |
-| Platform | `http://IP-SERVER/platform` |
+| Platform Admin | `http://IP-SERVER/platform` |
+| Remote Device Center | `http://IP-SERVER/platform/devices` |
 | Daftar bisnis baru | `http://IP-SERVER/register` |
 | APK mobile | `http://IP-SERVER/api/v1/mobile/version?platform=android` |
 
-Panduan lengkap: [docs/CLIENT-INSTALL.md](docs/CLIENT-INSTALL.md) · [docs/TUTORIAL-LENGKAP.md](docs/TUTORIAL-LENGKAP.md) (setup → aktif → fitur → payment gateway) · [docs/GATEWAY-SETUP.md](docs/GATEWAY-SETUP.md) (payment, email, WhatsApp) · [docs/MODUL-DAN-FITUR.md](docs/MODUL-DAN-FITUR.md) (katalog modul web & mobile)
+**Versi saat ini:** `1.4.0` — lihat [VERSION](VERSION)
+
+Panduan deploy singkat: [docs/DEPLOY-SERVER.md](docs/DEPLOY-SERVER.md) · Panduan lengkap: [docs/CLIENT-INSTALL.md](docs/CLIENT-INSTALL.md) · [docs/TUTORIAL-LENGKAP.md](docs/TUTORIAL-LENGKAP.md) · [docs/GATEWAY-SETUP.md](docs/GATEWAY-SETUP.md) · [docs/MODUL-DAN-FITUR.md](docs/MODUL-DAN-FITUR.md)
 
 **Repo private:** set `GITHUB_TOKEN` (PAT dengan scope `repo`) sebelum `git clone`.
 

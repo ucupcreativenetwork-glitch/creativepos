@@ -18,7 +18,7 @@ if (-not (Test-Path ".git")) {
 $status = git status --porcelain
 if ($status) {
     git add -A
-    git commit -m "chore: deploy CreativePOS v1.3.1 — backend, frontend, flutter standalone"
+    git commit -m "chore: deploy CreativePOS v1.4.0 — backend, frontend, flutter, remote agent"
 }
 
 $remotes = git remote 2>$null
