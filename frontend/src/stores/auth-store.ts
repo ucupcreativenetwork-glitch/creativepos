@@ -69,7 +69,8 @@ export const useAuthStore = create<AuthState>()(
       setLoading: (loading) => set({ isLoading: loading }),
 
       hasPermission: (permission) => {
-        const { permissions } = get();
+        const { permissions, user } = get();
+        if (user?.is_super_admin) return true;
         return permissions.includes(permission);
       },
     }),

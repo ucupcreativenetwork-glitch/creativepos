@@ -3,6 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { getSubscription } from "@/lib/api/billing";
 import { getTenantSettings } from "@/lib/api/settings";
+import { useAuthStore } from "@/stores/auth-store";
 
 const TENANT_TOGGLE_MAP: Record<string, "feature_reservations" | "feature_delivery" | "feature_qr_menu"> = {
   reservation: "feature_reservations",
@@ -10,6 +11,7 @@ const TENANT_TOGGLE_MAP: Record<string, "feature_reservations" | "feature_delive
 };
 
 export function usePackageFeatures() {
+  const user = useAuthStore((s) => s.user);
   const { data: subscription, isLoading: subLoading } = useQuery({
     queryKey: ["billing", "subscription"],
     queryFn: getSubscription,
@@ -27,6 +29,7 @@ export function usePackageFeatures() {
   const hasPackageFeature = (key: string) => key in features;
 
   const hasFeature = (key: string) => {
+    if (user?.is_super_admin) return true;
     if (!hasPackageFeature(key)) return false;
 
     const toggleKey = TENANT_TOGGLE_MAP[key];

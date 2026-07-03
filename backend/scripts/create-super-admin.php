@@ -31,7 +31,6 @@ if (strlen($password) < 8) {
 
 $user = User::query()
     ->where('email', $email)
-    ->whereNull('tenant_id')
     ->where('is_super_admin', true)
     ->first();
 

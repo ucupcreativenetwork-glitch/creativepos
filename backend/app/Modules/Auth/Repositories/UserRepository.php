@@ -40,7 +40,6 @@ class UserRepository extends BaseRepository
         return $this->query()
             ->where('email', $email)
             ->where('is_super_admin', true)
-            ->whereNull('tenant_id')
             ->first();
     }
 

@@ -858,17 +858,43 @@ CreativePOS mendukung printer **ESC/POS 58mm & 80mm**.
 
 ## 11. Akun demo & Super Admin
 
-### 11.1 Akun bisnis (Owner) — instalasi baru
+### 11.1 Akun default (otomatis saat install)
 
-**Tidak ada akun default** setelah instalasi. Anda wajib membuat akun sendiri:
+Setelah `install.sh` / `migrate --seed`, dua akun siap dipakai:
+
+| Akun | Email | Password | Akses |
+|------|-------|----------|-------|
+| **Admin Toko** | `admin@creativepos.local` | `Admin123!` | Beberapa fitur (role **Manager**) |
+| **Super Admin** | `superadmin@creativepos.local` | `SuperAdmin123!` | **Semua fitur** + panel `/platform` |
+
+**Admin Toko** (`manager`) — bisa:
+
+- Dashboard, POS, inventori (lihat/tambah/edit), laporan, CRM, delivery, reservasi
+- Pengaturan (lihat, terbatas)
+
+**Tidak bisa:** hapus produk, kelola semua user, ubah outlet, void/refund penuh seperti owner.
+
+**Super Admin** — bisa:
+
+- Semua menu (POS, inventori, laporan, CRM, delivery, dll.)
+- Panel **Platform** (`/platform`) — kelola tenant, upload APK, MRR
+- Bypass permission di backend
+
+> **Production:** wajib ganti password! Set env sebelum install:
+> `CREATIVEPOS_DEMO_ADMIN_PASSWORD`, `CREATIVEPOS_SUPER_ADMIN_PASSWORD`
+> atau `SKIP_DEFAULT_ACCOUNTS=1` untuk lewati akun demo.
+
+Login: `http://IP-SERVER/login`
+
+### 11.2 Akun bisnis tambahan (Owner baru)
+
+Untuk bisnis kedua / mandiri tanpa akun demo:
 
 1. Buka `http://IP-SERVER/register`
 2. Isi nama bisnis, nama owner, email, password
-3. Login → Anda menjadi **Owner** tenant tersebut
+3. Login → Anda menjadi **Owner** tenant baru
 
-> Password yang Anda buat saat register — simpan dengan aman. Tidak ada reset otomatis tanpa SMTP.
-
-### 11.2 Data demo setelah register
+### 11.3 Data demo setelah register
 
 Seeder demo (`DashboardDemoSeeder`, dll.) berjalan saat **install**, sebelum ada tenant. Jadi pada instalasi normal **produk demo tidak otomatis muncul**.
 
@@ -897,7 +923,7 @@ docker compose -f docker-compose.client.yml exec -T backend php artisan db:seed 
 - Untuk produk massal setelah register → gunakan **import CSV** (bagian 14) atau tambah manual di **Inventori**.
 - Seeder demo bersifat **idempotent** — aman dijalankan ulang; data yang sudah ada dilewati.
 
-### 11.3 Akun driver demo (jika OperationsDemoSeeder dijalankan)
+### 11.4 Akun driver demo (jika OperationsDemoSeeder dijalankan)
 
 | Email | Password | Peran |
 |-------|----------|-------|
@@ -906,7 +932,7 @@ docker compose -f docker-compose.client.yml exec -T backend php artisan db:seed 
 
 Ganti `{slug-bisnis}` dengan slug tenant (mis. bisnis "Warung Makan" → `warung-makan`).
 
-### 11.4 Buat Super Admin (akses /platform)
+### 11.5 Buat / reset Super Admin manual
 
 Super Admin mengelola seluruh tenant, paket, dan upload APK.
 

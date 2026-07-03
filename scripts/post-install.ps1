@@ -30,6 +30,13 @@ Write-Host ("║  Daftar      : {0,-41} ║" -f "$base/register") -ForegroundCol
 Write-Host ("║  API Health  : {0,-41} ║" -f "$base/api/v1/health") -ForegroundColor Green
 Write-Host ("║  APK Mobile  : {0,-41} ║" -f "$base/api/v1/mobile/version?platform=android") -ForegroundColor Green
 Write-Host "╠══════════════════════════════════════════════════════════╣" -ForegroundColor Green
+Write-Host "║  Akun default (ganti password di production!)            ║" -ForegroundColor Green
+Write-Host ("║  Admin       : {0,-41} ║" -f "admin@creativepos.local") -ForegroundColor Green
+Write-Host ("║  Password    : {0,-41} ║" -f "Admin123!") -ForegroundColor Green
+Write-Host ("║  Super Admin : {0,-41} ║" -f "superadmin@creativepos.local") -ForegroundColor Green
+Write-Host ("║  Password    : {0,-41} ║" -f "SuperAdmin123!") -ForegroundColor Green
+Write-Host ("║  Platform    : {0,-41} ║" -f "$base/platform") -ForegroundColor Green
+Write-Host "╠══════════════════════════════════════════════════════════╣" -ForegroundColor Green
 Write-Host "║  Update      : scripts\update-from-github.ps1            ║" -ForegroundColor Green
 Write-Host "╚══════════════════════════════════════════════════════════╝" -ForegroundColor Green
 Write-Host ""

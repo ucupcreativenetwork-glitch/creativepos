@@ -13,6 +13,7 @@ class DatabaseSeeder extends Seeder
             RoleSeeder::class,
             PackageSeeder::class,
             PaymentMethodSeeder::class,
+            DefaultAccountsSeeder::class,
             DashboardDemoSeeder::class,
             LoyaltySeeder::class,
             QrMenuSeeder::class,
