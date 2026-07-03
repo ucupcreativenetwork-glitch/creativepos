@@ -14,6 +14,10 @@ class SendLoginNotification implements ShouldQueue
 {
     public function handle(UserLoggedIn $event): void
     {
+        if (app()->environment('local', 'testing')) {
+            return;
+        }
+
         try {
             $user = $event->user;
 
