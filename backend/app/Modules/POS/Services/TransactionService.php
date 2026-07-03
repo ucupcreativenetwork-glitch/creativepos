@@ -19,7 +19,6 @@ use App\Modules\Tenant\Models\TenantSetting;
 use App\Modules\Notification\Services\StockAlertService;
 use App\Modules\Loyalty\Models\PointTransaction;
 use App\Modules\POS\Repositories\TransactionRepository;
-use App\Modules\Tenant\Models\TenantSetting;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 
