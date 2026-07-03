@@ -100,3 +100,101 @@ export async function activateAppRelease(id: number): Promise<AppRelease> {
 export async function deleteAppRelease(id: number): Promise<void> {
   await apiClient.delete(`/platform/app-releases/${id}`);
 }
+
+export interface PlatformDevice {
+  id: number;
+  device_name: string;
+  fingerprint: string;
+  install_id?: string | null;
+  platform?: string | null;
+  browser?: string | null;
+  app_version?: string | null;
+  build_number?: number | null;
+  os_version?: string | null;
+  device_model?: string | null;
+  mac_address?: string | null;
+  last_ip?: string | null;
+  api_base_url?: string | null;
+  agent_version?: string | null;
+  remote_agent_enabled: boolean;
+  is_online: boolean;
+  last_seen_at?: string | null;
+  last_used_at?: string | null;
+  created_at?: string | null;
+  user?: { id: number; name: string; email: string } | null;
+  tenant?: { id: number; name: string; slug: string } | null;
+}
+
+export interface PlatformDeviceStats {
+  total_devices: number;
+  online_devices: number;
+  android_devices: number;
+  web_devices: number;
+  pending_commands: number;
+}
+
+export interface PlatformDeviceDetail {
+  device: PlatformDevice;
+  diagnostics: Array<{
+    id: number;
+    type: string;
+    title?: string | null;
+    content: string;
+    metadata?: Record<string, unknown> | null;
+    created_at?: string | null;
+  }>;
+  commands: Array<{
+    id: number;
+    command: string;
+    status: string;
+    payload?: Record<string, unknown> | null;
+    result?: string | null;
+    created_at?: string | null;
+    completed_at?: string | null;
+  }>;
+}
+
+export async function getPlatformDeviceStats(): Promise<PlatformDeviceStats> {
+  const { data } = await apiClient.get<ApiResponse<PlatformDeviceStats>>(
+    "/platform/devices/stats",
+  );
+  return data.data;
+}
+
+export async function getPlatformDevices(params?: {
+  search?: string;
+  platform?: string;
+  online_only?: boolean;
+  page?: number;
+  per_page?: number;
+}): Promise<{ items: PlatformDevice[]; total: number }> {
+  const { data } = await apiClient.get<
+    ApiResponse<PlatformDevice[]> & {
+      meta?: { total?: number };
+    }
+  >("/platform/devices", { params });
+  return {
+    items: data.data,
+    total: data.meta?.total ?? data.data.length,
+  };
+}
+
+export async function getPlatformDeviceDetail(
+  id: number,
+): Promise<PlatformDeviceDetail> {
+  const { data } = await apiClient.get<ApiResponse<PlatformDeviceDetail>>(
+    `/platform/devices/${id}`,
+  );
+  return data.data;
+}
+
+export async function sendPlatformDeviceCommand(
+  id: number,
+  command: string,
+  payload?: Record<string, unknown>,
+): Promise<void> {
+  await apiClient.post(`/platform/devices/${id}/commands`, {
+    command,
+    payload,
+  });
+}

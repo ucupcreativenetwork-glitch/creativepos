@@ -61,6 +61,7 @@ Route::prefix('v1')->middleware('throttle:api')->group(function (): void {
         });
         require app_path('Modules/Billing/Routes/api.php');
         require app_path('Modules/Notification/Routes/api.php');
+        require app_path('Modules/RemoteSupport/Routes/api.php');
         require app_path('Modules/Settings/Routes/api.php');
 
         Route::prefix('auth')->name('auth.')->group(function (): void {

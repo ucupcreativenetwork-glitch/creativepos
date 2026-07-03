@@ -6,6 +6,7 @@ import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'features/auth/providers/auth_providers.dart';
 import 'services/fcm_service.dart';
+import 'services/remote_agent_service.dart';
 import 'services/sync_service.dart';
 import 'services/update_service.dart';
 import 'shared/widgets/auth_splash_overlay.dart';
@@ -19,20 +20,58 @@ class CreativePosApp extends ConsumerWidget {
     final router = ref.watch(appRouterProvider);
 
     return _SyncBootstrap(
-      child: _FcmBootstrap(
-        child: _UpdateBootstrap(
-          child: AuthSplashOverlay(
-            child: MaterialApp.router(
-              title: 'CreativePOS',
-              debugShowCheckedModeBanner: false,
-              theme: AppTheme.light(),
-              scaffoldMessengerKey: rootScaffoldMessengerKey,
-              routerConfig: router,
+      child: _RemoteAgentBootstrap(
+        child: _FcmBootstrap(
+          child: _UpdateBootstrap(
+            child: AuthSplashOverlay(
+              child: MaterialApp.router(
+                title: 'CreativePOS',
+                debugShowCheckedModeBanner: false,
+                theme: AppTheme.light(),
+                scaffoldMessengerKey: rootScaffoldMessengerKey,
+                routerConfig: router,
+              ),
             ),
           ),
         ),
       ),
     );
+  }
+}
+
+class _RemoteAgentBootstrap extends ConsumerStatefulWidget {
+  const _RemoteAgentBootstrap({required this.child});
+
+  final Widget child;
+
+  @override
+  ConsumerState<_RemoteAgentBootstrap> createState() =>
+      _RemoteAgentBootstrapState();
+}
+
+class _RemoteAgentBootstrapState extends ConsumerState<_RemoteAgentBootstrap> {
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(_startAgent);
+  }
+
+  Future<void> _startAgent() async {
+    await ref.read(remoteAgentServiceProvider).start();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    ref.listen<AuthState>(authControllerProvider, (prev, next) {
+      if (next.status == AuthStatus.authenticated ||
+          next.status == AuthStatus.standalone) {
+        ref.read(remoteAgentServiceProvider).start();
+      } else {
+        ref.read(remoteAgentServiceProvider).stop();
+      }
+    });
+
+    return widget.child;
   }
 }
 

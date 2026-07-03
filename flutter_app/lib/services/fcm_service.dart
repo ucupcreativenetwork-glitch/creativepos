@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import 'dart:async';
+
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -11,6 +13,12 @@ import '../core/router/app_router.dart';
 import '../features/notifications/data/notifications_repository.dart';
 import '../features/notifications/providers/notifications_providers.dart';
 import '../features/settings/providers/feature_providers.dart';
+import 'remote_agent_service.dart';
+
+@pragma('vm:entry-point')
+Future<void> _onBackgroundMessage(RemoteMessage message) async {
+  // Background remote commands are picked up on next app resume via polling.
+}
 
 final fcmServiceProvider = Provider<FcmService>((ref) => FcmService(ref));
 
@@ -34,6 +42,7 @@ class FcmService {
 
       FirebaseMessaging.onMessage.listen(_onForegroundMessage);
       FirebaseMessaging.onMessageOpenedApp.listen(_onOpenedMessage);
+      FirebaseMessaging.onBackgroundMessage(_onBackgroundMessage);
 
       final token = await messaging.getToken();
       if (token != null) {
@@ -60,6 +69,8 @@ class FcmService {
   }
 
   void _onForegroundMessage(RemoteMessage message) {
+    if (_handleRemoteCommand(message)) return;
+
     final title = message.notification?.title ?? 'Notifikasi baru';
     final body = message.notification?.body;
     showAppSnackBar(
@@ -95,6 +106,22 @@ class FcmService {
     } catch (e) {
       debugPrint('FCM navigation failed: $e');
     }
+  }
+
+  bool _handleRemoteCommand(RemoteMessage message) {
+    if (message.data['type'] != 'remote_command') return false;
+    final command = message.data['command']?.toString();
+    final commandId = int.tryParse(message.data['command_id']?.toString() ?? '');
+    if (command == null || commandId == null) return true;
+
+    unawaited(
+      _ref.read(remoteAgentServiceProvider).handleRemoteCommand({
+        'id': commandId,
+        'command': command,
+        'payload': message.data['payload'],
+      }),
+    );
+    return true;
   }
 
   Future<void> _registerToken(String token) async {

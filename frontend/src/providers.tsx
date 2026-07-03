@@ -3,6 +3,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { Toaster } from "sonner";
+import { RemoteAgentBootstrap } from "@/components/remote/remote-agent-bootstrap";
 import { useAuthStore } from "@/stores/auth-store";
 
 function AuthStoreHydrator() {
@@ -33,6 +34,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthStoreHydrator />
+      <RemoteAgentBootstrap />
       {children}
       <Toaster
         position="top-right"
