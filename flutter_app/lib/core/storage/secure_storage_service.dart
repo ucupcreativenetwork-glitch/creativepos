@@ -24,26 +24,35 @@ class SecureStorageService {
   final Map<String, String>? _memory;
 
   Future<void> write(String key, String value) async {
-    if (_memory != null) {
-      _memory![key] = value;
+    final memory = _memory;
+    if (memory != null) {
+      memory[key] = value;
       return;
     }
-    await _storage!.write(key: key, value: value);
+    final storage = _storage;
+    if (storage == null) return;
+    await storage.write(key: key, value: value);
   }
 
   Future<String?> read(String key) async {
-    if (_memory != null) {
-      return _memory![key];
+    final memory = _memory;
+    if (memory != null) {
+      return memory[key];
     }
-    return _storage!.read(key: key);
+    final storage = _storage;
+    if (storage == null) return null;
+    return storage.read(key: key);
   }
 
   Future<void> delete(String key) async {
-    if (_memory != null) {
-      _memory!.remove(key);
+    final memory = _memory;
+    if (memory != null) {
+      memory.remove(key);
       return;
     }
-    await _storage!.delete(key: key);
+    final storage = _storage;
+    if (storage == null) return;
+    await storage.delete(key: key);
   }
 
   Future<void> clearSession() async {
@@ -51,10 +60,13 @@ class SecureStorageService {
   }
 
   Future<void> clearAll() async {
-    if (_memory != null) {
-      _memory!.clear();
+    final memory = _memory;
+    if (memory != null) {
+      memory.clear();
       return;
     }
-    await _storage!.deleteAll();
+    final storage = _storage;
+    if (storage == null) return;
+    await storage.deleteAll();
   }
 }
