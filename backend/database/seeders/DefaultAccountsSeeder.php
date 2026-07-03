@@ -37,7 +37,8 @@ class DefaultAccountsSeeder extends Seeder
 
         $user = User::query()
             ->where('email', $email)
-            ->whereNull('tenant_id')
+            ->where('is_super_admin', true)
+            ->orderByRaw('tenant_id IS NULL DESC')
             ->first();
 
         if ($user === null) {
@@ -59,6 +60,12 @@ class DefaultAccountsSeeder extends Seeder
                 'must_change_password' => true,
             ]);
         }
+
+        User::query()
+            ->where('email', $email)
+            ->where('is_super_admin', true)
+            ->where('id', '!=', $user->id)
+            ->delete();
 
     }
 
@@ -182,16 +189,31 @@ class DefaultAccountsSeeder extends Seeder
         $superAdmin = User::query()
             ->where('email', $email)
             ->where('is_super_admin', true)
+            ->orderByRaw('tenant_id = ? DESC', [$tenant->id])
             ->first();
 
         if ($superAdmin === null) {
             return;
         }
 
+        if ((int) $superAdmin->tenant_id !== (int) $tenant->id) {
+            User::query()
+                ->where('email', $email)
+                ->where('tenant_id', $tenant->id)
+                ->where('id', '!=', $superAdmin->id)
+                ->delete();
+        }
+
         $superAdmin->update([
             'tenant_id' => $tenant->id,
             'outlet_id' => $outlet->id,
         ]);
+
+        User::query()
+            ->where('email', $email)
+            ->where('is_super_admin', true)
+            ->where('id', '!=', $superAdmin->id)
+            ->delete();
     }
 
     protected function seedDemoProducts(Tenant $tenant, Warehouse $warehouse): void

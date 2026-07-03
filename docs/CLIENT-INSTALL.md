@@ -3,7 +3,8 @@
 Panduan memasang CreativePOS di server milik client (toko, restoran, kantor) — tanpa cloud SaaS.
 
 > **Tutorial lengkap** (setup → aktif → fitur → payment gateway): [TUTORIAL-LENGKAP.md](./TUTORIAL-LENGKAP.md)  
-> **Katalog modul** (web, mobile, API): [MODUL-DAN-FITUR.md](./MODUL-DAN-FITUR.md)
+> **Katalog modul** (web, mobile, API): [MODUL-DAN-FITUR.md](./MODUL-DAN-FITUR.md)  
+> **Gateway** (payment, email, WhatsApp): [GATEWAY-SETUP.md](./GATEWAY-SETUP.md)
 
 ## Persyaratan Server
 
