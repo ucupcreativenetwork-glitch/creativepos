@@ -95,7 +95,7 @@ export function LoginForm() {
           Masuk ke akun CreativePOS Anda
         </CardDescription>
       </CardHeader>
-      <form onSubmit={handleSubmit(onSubmit)}>
+      <form method="post" onSubmit={handleSubmit(onSubmit)}>
         <CardContent className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="email" required>
