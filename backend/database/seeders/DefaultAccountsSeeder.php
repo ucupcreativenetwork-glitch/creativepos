@@ -38,7 +38,7 @@ class DefaultAccountsSeeder extends Seeder
         $user = User::query()
             ->where('email', $email)
             ->where('is_super_admin', true)
-            ->orderByRaw('tenant_id IS NULL DESC')
+            ->orderByDesc('tenant_id')
             ->first();
 
         if ($user === null) {
@@ -60,12 +60,6 @@ class DefaultAccountsSeeder extends Seeder
                 'must_change_password' => true,
             ]);
         }
-
-        User::query()
-            ->where('email', $email)
-            ->where('is_super_admin', true)
-            ->where('id', '!=', $user->id)
-            ->delete();
 
     }
 
@@ -186,34 +180,34 @@ class DefaultAccountsSeeder extends Seeder
     {
         $email = strtolower(env('CREATIVEPOS_SUPER_ADMIN_EMAIL', 'superadmin@creativepos.local'));
 
-        $superAdmin = User::query()
+        $superAdmin = User::withTrashed()
             ->where('email', $email)
             ->where('is_super_admin', true)
-            ->orderByRaw('tenant_id = ? DESC', [$tenant->id])
-            ->first();
+            ->where('tenant_id', $tenant->id)
+            ->first()
+            ?? User::query()
+                ->where('email', $email)
+                ->where('is_super_admin', true)
+                ->first();
 
         if ($superAdmin === null) {
             return;
         }
 
-        if ((int) $superAdmin->tenant_id !== (int) $tenant->id) {
-            User::query()
-                ->where('email', $email)
-                ->where('tenant_id', $tenant->id)
-                ->where('id', '!=', $superAdmin->id)
-                ->delete();
+        if ($superAdmin->trashed()) {
+            $superAdmin->restore();
         }
+
+        User::withTrashed()
+            ->where('email', $email)
+            ->where('is_super_admin', true)
+            ->where('id', '!=', $superAdmin->id)
+            ->forceDelete();
 
         $superAdmin->update([
             'tenant_id' => $tenant->id,
             'outlet_id' => $outlet->id,
         ]);
-
-        User::query()
-            ->where('email', $email)
-            ->where('is_super_admin', true)
-            ->where('id', '!=', $superAdmin->id)
-            ->delete();
     }
 
     protected function seedDemoProducts(Tenant $tenant, Warehouse $warehouse): void
