@@ -109,4 +109,6 @@ git clone https://${GITHUB_TOKEN}@github.com/ucupcreativenetwork-glitch/creative
 | Migrate error | `php artisan migrate --force` manual di container backend |
 | APK tidak update | Build APK baru lalu publish via Platform Admin → Upload APK |
 
+**Akses dari internet (Cloudflare):** [DEPLOY-CLOUDFLARE.md](./DEPLOY-CLOUDFLARE.md)
+
 Panduan lengkap: [CLIENT-INSTALL.md](./CLIENT-INSTALL.md)

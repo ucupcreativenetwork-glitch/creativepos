@@ -20,6 +20,15 @@ return Application::configure(basePath: dirname(__DIR__))
         apiPrefix: 'api',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // Cloudflare / reverse proxy — agar APP_URL https & IP klien benar
+        $middleware->trustProxies(
+            at: env('TRUSTED_PROXIES', '*'),
+            headers: Request::HEADER_X_FORWARDED_FOR
+                | Request::HEADER_X_FORWARDED_HOST
+                | Request::HEADER_X_FORWARDED_PORT
+                | Request::HEADER_X_FORWARDED_PROTO,
+        );
+
         // Token-based API (Bearer) — no SPA cookie/CSRF session flow
         $middleware->alias([
             'tenant' => \App\Shared\Middleware\ResolveTenant::class,
