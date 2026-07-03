@@ -19,6 +19,7 @@ APP_HOST="${1:-}"
 APP_PORT="${2:-80}"
 SKIP_SEED="${SKIP_SEED:-0}"
 SKIP_APK="${SKIP_APK:-0}"
+SKIP_PREREQUISITES="${SKIP_PREREQUISITES:-0}"
 DO_CLONE=0
 
 usage() {
@@ -34,6 +35,8 @@ Opsi environment:
   GITHUB_REPO      URL git (default: creativepos official)
   SKIP_SEED=1      Lewati seed database demo
   SKIP_APK=1       Lewati unduh APK dari GitHub Releases
+  SKIP_PREREQS=1   Lewati install Docker/Git (sudah terpasang)
+  SKIP_PREREQUISITES=1  Lewati auto-install Docker/Git
 
 Contoh:
   git clone https://github.com/ucupcreativenetwork-glitch/creativepos.git /opt/creativepos
@@ -66,13 +69,47 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-need_cmd() {
-  command -v "$1" >/dev/null 2>&1 || { echo "Perintah '$1' tidak ditemukan. Install dulu."; exit 1; }
+run_prerequisites() {
+  if [[ "$SKIP_PREREQS" == "1" ]]; then
+    echo "Lewati install prerequisites (SKIP_PREREQS=1)."
+    return
+  fi
+
+  if [[ "${EUID:-}" -ne 0 ]]; then
+    echo "Install Docker/Git membutuhkan sudo. Jalankan:"
+    echo "  sudo bash install.sh [IP_SERVER]"
+    exit 1
+  fi
+
+  local script_dir
+  script_dir="$(cd "$(dirname "$0")" && pwd)"
+
+  if [[ -f "$script_dir/install-prerequisites.sh" ]]; then
+    bash "$script_dir/install-prerequisites.sh"
+  elif [[ -f "$script_dir/bootstrap-prerequisites.sh" ]]; then
+    bash "$script_dir/bootstrap-prerequisites.sh"
+  else
+    echo "Bootstrap prerequisites..."
+    export DEBIAN_FRONTEND=noninteractive
+    apt-get update -qq
+    apt-get install -y -qq ca-certificates curl gnupg git lsb-release apt-transport-https
+    if ! command -v docker >/dev/null 2>&1; then
+      curl -fsSL https://get.docker.com | sh
+    fi
+    systemctl enable docker 2>/dev/null || true
+    systemctl start docker 2>/dev/null || true
+  fi
 }
 
-need_cmd git
-need_cmd docker
-docker compose version >/dev/null 2>&1 || { echo "Docker Compose plugin belum terpasang."; exit 1; }
+verify_prerequisites() {
+  command -v git >/dev/null || { echo "Git belum terpasang."; exit 1; }
+  command -v docker >/dev/null || { echo "Docker belum terpasang."; exit 1; }
+  docker compose version >/dev/null 2>&1 || { echo "Docker Compose belum terpasang."; exit 1; }
+}
+
+# Prerequisites dulu (sebelum clone — butuh git & curl)
+run_prerequisites
+verify_prerequisites
 
 clone_repo() {
   local target="$1"

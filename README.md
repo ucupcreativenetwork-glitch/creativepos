@@ -34,19 +34,32 @@ CreativePOS adalah platform SaaS enterprise siap pasar untuk bisnis F&B dan reta
 
 ---
 
-## Instalasi Server dari GitHub (1 perintah)
+## Instalasi Server dari GitHub
 
-**Persyaratan server:** Docker + Docker Compose + Git
+Docker, Docker Compose, dan Git **diinstall otomatis** oleh skrip.
 
-### Linux (Ubuntu / Debian)
+### Ubuntu — server kosong (1 baris)
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/ucupcreativenetwork-glitch/creativepos/main/bootstrap.sh | sudo bash -s -- 10.110.1.15
+```
+
+### Ubuntu — sudah ada Git
 
 ```bash
 sudo git clone https://github.com/ucupcreativenetwork-glitch/creativepos.git /opt/creativepos
 cd /opt/creativepos
-sudo bash install.sh 10.110.1.15    # ganti dengan IP server Anda
+sudo bash install.sh 10.110.1.15
 ```
 
-### Windows Server + Docker Desktop
+### Windows — Administrator (Docker Desktop auto-install)
+
+```powershell
+# PowerShell sebagai Administrator
+irm https://raw.githubusercontent.com/ucupcreativenetwork-glitch/creativepos/main/bootstrap.ps1 | iex
+```
+
+Atau:
 
 ```powershell
 git clone https://github.com/ucupcreativenetwork-glitch/creativepos.git D:\creativepos

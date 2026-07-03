@@ -8,7 +8,8 @@ param(
     [string]$AppHost = "",
     [int]$AppPort = 80,
     [switch]$SkipSeed,
-    [switch]$SkipApk
+    [switch]$SkipApk,
+    [switch]$SkipPrerequisites
 )
 
 $Root = Split-Path -Parent $MyInvocation.MyCommand.Path
@@ -19,5 +20,6 @@ if ($AppHost) { $params.AppHost = $AppHost }
 if ($AppPort) { $params.AppPort = $AppPort }
 if ($SkipSeed) { $params.SkipSeed = $true }
 if ($SkipApk) { $params.SkipApk = $true }
+if ($SkipPrerequisites) { $params.SkipPrerequisites = $true }
 
 & $script @params

@@ -6,6 +6,7 @@ param(
     [switch]$Clone,
     [switch]$SkipSeed,
     [switch]$SkipApk,
+    [switch]$SkipPrerequisites,
     [string]$GitHubToken = $env:GITHUB_TOKEN,
     [string]$GitHubRepo = "https://github.com/ucupcreativenetwork-glitch/creativepos.git"
 )
@@ -47,6 +48,25 @@ if ($Clone) {
 
 if (-not (Test-Path (Join-Path $Root "scripts\install-client.ps1"))) {
     throw "Bukan folder CreativePOS. Clone dulu atau jalankan dari root repo."
+}
+
+if (-not $SkipPrerequisites) {
+    $prereqScript = Join-Path $Root "scripts\install-prerequisites.ps1"
+    if (Test-Path $prereqScript) {
+        & $prereqScript
+    } else {
+        Write-Host "scripts\install-prerequisites.ps1 tidak ditemukan — pastikan Docker Desktop & Git terpasang." -ForegroundColor Yellow
+    }
+} else {
+    Write-Host "Lewati install prerequisites." -ForegroundColor Yellow
+}
+
+if (-not (Get-Command docker -ErrorAction SilentlyContinue)) {
+    throw "Docker belum terpasang. Jalankan tanpa -SkipPrerequisites atau install Docker Desktop."
+}
+docker compose version 2>$null | Out-Null
+if ($LASTEXITCODE -ne 0) {
+    throw "Docker Compose belum tersedia. Update Docker Desktop."
 }
 
 Write-Host "`n╔══════════════════════════════════════════╗" -ForegroundColor Cyan

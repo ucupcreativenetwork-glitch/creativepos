@@ -6,15 +6,44 @@ Panduan memasang CreativePOS di server milik client (toko, restoran, kantor) —
 
 | Item | Minimum |
 |------|---------|
-| OS | Ubuntu 22.04+ atau Windows Server + Docker Desktop |
+| OS | Ubuntu 22.04+ atau Windows 10/11 / Server 2022 |
 | CPU | 2 core |
 | RAM | 4 GB |
 | Disk | 20 GB |
 | Jaringan | LAN / WiFi toko (tablet & kasir akses IP server) |
 
-Software: **Docker** + **Docker Compose**
+Software diinstall **otomatis** oleh skrip: **Git**, **Docker**, **Docker Compose**
 
-## Instalasi dari GitHub (Disarankan)
+## Server Ubuntu Kosong (1 baris)
+
+Docker, Git, dan CreativePOS terinstall otomatis:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/ucupcreativenetwork-glitch/creativepos/main/bootstrap.sh | sudo bash -s -- 10.110.1.15
+```
+
+Ganti `10.110.1.15` dengan IP server Anda.
+
+## Windows Server Kosong (Administrator)
+
+Buka **PowerShell sebagai Administrator**:
+
+```powershell
+Set-ExecutionPolicy Bypass -Scope Process -Force
+irm https://raw.githubusercontent.com/ucupcreativenetwork-glitch/creativepos/main/bootstrap.ps1 | iex
+# Lalu jalankan lagi dengan IP:
+powershell -ExecutionPolicy Bypass -File D:\creativepos\bootstrap.ps1 -AppHost 10.110.1.15
+```
+
+Atau clone dulu lalu install (Docker Desktop diinstall otomatis):
+
+```powershell
+git clone https://github.com/ucupcreativenetwork-glitch/creativepos.git D:\creativepos
+cd D:\creativepos
+powershell -ExecutionPolicy Bypass -File install.ps1 -AppHost 10.110.1.15
+```
+
+## Instalasi dari GitHub (sudah ada Git)
 
 Semua komponen (backend, frontend, database, Redis, nginx) diinstall dari repo GitHub — tidak perlu copy manual.
 
