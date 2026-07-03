@@ -47,7 +47,7 @@ Tenant demo **Toko Demo CreativePOS** sudah berisi 4 produk siap jual.
 11. [Akun demo & Super Admin](#11-akun-demo--super-admin)
 12. [Panel Platform Admin](#12-panel-platform-admin)
 13. [Build APK dari source](#13-build-apk-dari-source)
-14. [Import produk massal (CSV)](#14-import-produk-massal-csv)
+14. [Import produk & stok massal](#14-import-produk--stok-massal)
 15. [Troubleshooting](#15-troubleshooting)
 16. [Skrip penting & variabel environment](#16-skrip-penting--variabel-environment)
 17. [Matriks role & permission](#17-matriks-role--permission)
@@ -1162,11 +1162,15 @@ docker compose -f docker-compose.client.yml exec -T backend \
 
 ---
 
-## 14. Import produk massal (CSV)
+## 14. Import produk & stok massal
 
-Untuk ratusan/ribuan SKU — gunakan skrip import CSV (terverifikasi, tidak lewat UI).
+Katalog modul lengkap: [MODUL-DAN-FITUR.md](./MODUL-DAN-FITUR.md)
 
-### 14.1 Format CSV
+### 14.1 Import produk baru (CSV — CLI)
+
+Untuk ratusan/ribuan SKU baru — gunakan skrip import CSV (terverifikasi, tidak lewat UI web).
+
+#### Format CSV produk
 
 Template: [`docs/templates/products-import.csv`](./templates/products-import.csv)
 
@@ -1182,7 +1186,7 @@ Template: [`docs/templates/products-import.csv`](./templates/products-import.csv
 | `min_stock` | Tidak | 10 | Alert stok menipis |
 | `track_stock` | Tidak | 1 | `1`/`0` — lacak stok |
 
-### 14.2 Langkah import (server Linux)
+#### Langkah import produk (server Linux)
 
 ```bash
 cd /opt/creativepos
@@ -1212,23 +1216,71 @@ Berhasil : 4
 Dilewati : 0
 ```
 
-### 14.3 Import via Excel
+#### Import produk via Excel
 
 1. Buka template CSV di Excel / Google Sheets
 2. Isi data produk
-3. **Save As → CSV UTF-8** (bukan .xlsx langsung)
+3. **Save As → CSV UTF-8** (untuk skrip CLI), atau simpan `.xlsx` lalu konversi
 4. Upload ke server → jalankan skrip seperti di atas
 
-### 14.4 Aturan & batasan
+#### Aturan import produk
 
 - SKU duplikat **dilewati** (tidak menimpa produk lama)
 - Melebihi limit paket (`max_products`) → error dari sistem
 - Kategori dibuat otomatis berdasarkan `category_name`
 - Stok awal masuk ke **gudang default** outlet
 
-### 14.5 Alternatif: tambah manual (sedikit produk)
+#### Alternatif: tambah manual (sedikit produk)
 
 **Inventori → Produk → Tambah Produk** di web, atau scan/tambah di app Android tab **Toko**.
+
+### 14.2 Import stok massal (CSV/Excel — Web & CLI)
+
+Untuk update stok banyak SKU sekaligus (restok, opname, koreksi) — **produk harus sudah ada** di sistem.
+
+#### Format CSV stok
+
+Template: [`docs/templates/stock-import.csv`](./templates/stock-import.csv)
+
+| Kolom | Wajib | Contoh | Keterangan |
+|-------|-------|--------|------------|
+| `sku` | Ya | DEMO-NGS-001 | SKU produk yang sudah terdaftar |
+| `quantity` | Ya | 20 | Jumlah in/out, atau **stok baru** untuk adjustment |
+| `action` | Ya | in | `in` = tambah, `out` = kurang, `adjustment` = set ke jumlah baru |
+| `notes` | Tidak | Restok supplier | Catatan riwayat stok |
+| `warehouse_code` | Tidak | WH-01 | Kosong = gudang default |
+
+#### Via web (disarankan)
+
+1. Login → **Inventori** → tombol **Import Stok**
+2. Unduh template CSV
+3. Isi di Excel (boleh upload langsung `.xlsx` atau `.csv`)
+4. Pilih gudang default (opsional)
+5. Klik **Import Stok** — sistem menampilkan jumlah berhasil & error per baris
+
+Permission: `inventory.stock.adjust` (Manager ke atas).
+
+#### Via CLI (server)
+
+```bash
+cd /opt/creativepos
+mkdir -p backend/storage/app/import
+cp docs/templates/stock-import.csv backend/storage/app/import/stock.csv
+# Edit stock.csv sesuai data Anda
+
+cd docker
+docker compose -f docker-compose.client.yml exec -T backend \
+  php scripts/import-stock-csv.php /var/www/html/storage/app/import/stock.csv 1
+```
+
+Argumen opsional ke-3: `warehouse_id` default jika kolom `warehouse_code` kosong.
+
+#### Aturan import stok
+
+- Produk dengan `track_stock = 0` dilewati
+- SKU tidak ditemukan → baris dilewati (error dicatat)
+- Stok keluar melebihi stok tersedia → baris gagal
+- Setiap baris sukses tercatat di **Riwayat Pergerakan Stok**
 
 ---
 
@@ -1246,7 +1298,8 @@ Dilewati : 0
 | WhatsApp gagal | Token valid; format nomor benar; integrasi diaktifkan |
 | HTTPS certificate error | Periksa mount `/etc/letsencrypt`; renew certbot |
 | Printer BT gagal | Pair di Android; izin Bluetooth; lebar kertas 58/80mm |
-| Import CSV gagal | Header wajib: name,sku,base_price; encoding UTF-8 |
+| Import produk CSV gagal | Header wajib: name,sku,base_price; encoding UTF-8 |
+| Import stok gagal | SKU harus sudah ada; action = in/out/adjustment; cek gudang aktif |
 | Super Admin 403 | `php artisan db:seed --class=DefaultAccountsSeeder --force` atau `create-super-admin.php` |
 | Akun default tidak ada | `SKIP_SEED=1` dipakai saat install — jalankan seeder manual |
 | Login admin gagal | Pastikan seed selesai; cek `users` di database |
@@ -1279,6 +1332,7 @@ Dilewati : 0
 |-------|--------|
 | `backend/scripts/create-super-admin.php` | Buat/reset Super Admin |
 | `backend/scripts/import-products-csv.php` | Import produk massal CSV |
+| `backend/scripts/import-stock-csv.php` | Import stok massal CSV (CLI) |
 | `backend/scripts/publish-apk.php` | Publish APK ke server |
 
 ### Variabel environment instalasi
@@ -1325,6 +1379,8 @@ Tambah staff: **Pengaturan → Pengguna → Undang** (Owner/Manager).
 - [ANDROID-APP.md](./ANDROID-APP.md) — build & pasang APK
 - [flutter_app/docs/BUILD_ANDROID.md](../flutter_app/docs/BUILD_ANDROID.md) — signing & Play Store
 - [templates/products-import.csv](./templates/products-import.csv) — template import produk
+- [templates/stock-import.csv](./templates/stock-import.csv) — template import stok
+- [MODUL-DAN-FITUR.md](./MODUL-DAN-FITUR.md) — katalog modul web, mobile & API
 - [TAHAP-3/04-api-documentation.md](./TAHAP-3/04-api-documentation.md) — dokumentasi API
 - [TAHAP-1/03-feature-list.md](./TAHAP-1/03-feature-list.md) — daftar fitur lengkap
 

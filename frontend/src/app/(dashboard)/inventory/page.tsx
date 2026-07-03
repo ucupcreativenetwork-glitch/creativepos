@@ -12,6 +12,7 @@ import {
   Search,
   SlidersHorizontal,
   Trash2,
+  Upload,
 } from "lucide-react";
 import { toast } from "sonner";
 import { ProductFormDialog } from "@/components/inventory/product-form-dialog";
@@ -22,6 +23,7 @@ import {
   StockDialog,
   type StockAction,
 } from "@/components/inventory/stock-dialog";
+import { StockImportDialog } from "@/components/inventory/stock-import-dialog";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -57,6 +59,7 @@ export default function InventoryPage() {
   const [stockAction, setStockAction] = useState<StockAction>("in");
   const [stockProduct, setStockProduct] = useState<Product | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Product | null>(null);
+  const [importOpen, setImportOpen] = useState(false);
 
   const { data: categoriesData } = useQuery({
     queryKey: ["inventory", "categories"],
@@ -128,15 +131,21 @@ export default function InventoryPage() {
           </p>
         </div>
         {activeTab === "products" && (
-          <Button
-            onClick={() => {
-              setEditingProduct(null);
-              setFormOpen(true);
-            }}
-          >
-            <Plus className="h-4 w-4" />
-            Tambah Produk
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button variant="outline" onClick={() => setImportOpen(true)}>
+              <Upload className="h-4 w-4" />
+              Import Stok
+            </Button>
+            <Button
+              onClick={() => {
+                setEditingProduct(null);
+                setFormOpen(true);
+              }}
+            >
+              <Plus className="h-4 w-4" />
+              Tambah Produk
+            </Button>
+          </div>
         )}
       </div>
 
@@ -460,6 +469,13 @@ export default function InventoryPage() {
           setStockOpen(false);
           setStockProduct(null);
         }}
+        onSuccess={refresh}
+      />
+
+      <StockImportDialog
+        open={importOpen}
+        warehouses={warehouses}
+        onClose={() => setImportOpen(false)}
         onSuccess={refresh}
       />
 

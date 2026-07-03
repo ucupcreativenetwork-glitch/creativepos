@@ -2,7 +2,8 @@
 
 Panduan memasang CreativePOS di server milik client (toko, restoran, kantor) — tanpa cloud SaaS.
 
-> **Tutorial lengkap** (setup → aktif → fitur → payment gateway): [TUTORIAL-LENGKAP.md](./TUTORIAL-LENGKAP.md)
+> **Tutorial lengkap** (setup → aktif → fitur → payment gateway): [TUTORIAL-LENGKAP.md](./TUTORIAL-LENGKAP.md)  
+> **Katalog modul** (web, mobile, API): [MODUL-DAN-FITUR.md](./MODUL-DAN-FITUR.md)
 
 ## Persyaratan Server
 
@@ -149,7 +150,7 @@ Tenant demo **Toko Demo CreativePOS** sudah berisi outlet + 4 produk. Ganti pass
 3. Bisnis baru: `http://IP-SERVER/register`
 4. Tablet/Android: pasang APK → arahkan ke `http://IP-SERVER`
 
-Detail: [TUTORIAL-LENGKAP.md](./TUTORIAL-LENGKAP.md)
+Detail: [TUTORIAL-LENGKAP.md](./TUTORIAL-LENGKAP.md) · Modul: [MODUL-DAN-FITUR.md](./MODUL-DAN-FITUR.md)
 
 ## Arsitektur Client
 

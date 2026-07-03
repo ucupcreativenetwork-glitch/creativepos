@@ -4,8 +4,10 @@ namespace App\Modules\Inventory\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Modules\Inventory\Requests\StockAdjustmentRequest;
+use App\Modules\Inventory\Requests\StockImportRequest;
 use App\Modules\Inventory\Requests\StockMovementRequest;
 use App\Modules\Inventory\Resources\StockMovementResource;
+use App\Modules\Inventory\Services\StockImportService;
 use App\Modules\Inventory\Services\StockService;
 use App\Shared\Responses\ApiResponse;
 use Illuminate\Http\JsonResponse;
@@ -15,6 +17,7 @@ class StockController extends Controller
 {
     public function __construct(
         private readonly StockService $stockService,
+        private readonly StockImportService $stockImportService,
     ) {}
 
     public function index(Request $request): JsonResponse
@@ -161,6 +164,21 @@ class StockController extends Controller
             'stock' => $result['stock'],
             'movement' => new StockMovementResource($result['movement']),
         ], 'Penyesuaian stok berhasil.');
+    }
+
+    public function import(StockImportRequest $request): JsonResponse
+    {
+        $this->authorizePermission($request, 'inventory.stock.adjust');
+
+        $result = $this->stockImportService->importFromFile(
+            $request->file('file'),
+            $request->integer('warehouse_id') ?: null,
+            $request->user()?->id,
+        );
+
+        $message = "Import stok selesai: {$result['processed']} berhasil, {$result['skipped']} dilewati.";
+
+        return ApiResponse::success($result, $message);
     }
 
     protected function authorizePermission(Request $request, string $permission): void

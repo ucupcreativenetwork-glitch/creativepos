@@ -13,7 +13,7 @@ CreativePOS adalah platform SaaS enterprise siap pasar untuk bisnis F&B dan reta
 
 **Fitur lengkap:**
 - POS Terminal & Shift Kasir
-- Inventori & Manajemen Stok
+- Inventori & Manajemen Stok (import stok massal CSV/Excel)
 - Loyalty Member & Wallet
 - QR Menu Digital & Kitchen Display (KDS)
 - Reservasi Meja & Delivery Order
@@ -84,7 +84,7 @@ cd /opt/creativepos && sudo bash update.sh
 | Daftar bisnis baru | `http://IP-SERVER/register` |
 | APK mobile | `http://IP-SERVER/api/v1/mobile/version?platform=android` |
 
-Panduan lengkap: [docs/CLIENT-INSTALL.md](docs/CLIENT-INSTALL.md) · [docs/TUTORIAL-LENGKAP.md](docs/TUTORIAL-LENGKAP.md) (setup → aktif → fitur → payment gateway)
+Panduan lengkap: [docs/CLIENT-INSTALL.md](docs/CLIENT-INSTALL.md) · [docs/TUTORIAL-LENGKAP.md](docs/TUTORIAL-LENGKAP.md) (setup → aktif → fitur → payment gateway) · [docs/MODUL-DAN-FITUR.md](docs/MODUL-DAN-FITUR.md) (katalog modul web & mobile)
 
 **Repo private:** set `GITHUB_TOKEN` (PAT dengan scope `repo`) sebelum `git clone`.
 

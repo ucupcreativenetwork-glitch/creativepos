@@ -27,6 +27,7 @@ Route::prefix('inventory')->group(function (): void {
     Route::post('/stocks/in', [StockController::class, 'stockIn']);
     Route::post('/stocks/out', [StockController::class, 'stockOut']);
     Route::post('/stocks/adjustment', [StockController::class, 'adjustment']);
+    Route::post('/stocks/import', [StockController::class, 'import']);
 
     Route::get('/raw-materials', [RawMaterialController::class, 'index']);
     Route::get('/raw-materials/alerts', [RawMaterialController::class, 'alerts']);

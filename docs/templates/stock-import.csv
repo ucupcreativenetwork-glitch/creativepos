@@ -1,0 +1,4 @@
+sku,quantity,action,notes,warehouse_code
+DEMO-NGS-001,20,in,Restok dari supplier,
+DEMO-ETM-001,5,out,Penyesuaian rusak,
+DEMO-ABK-001,25,adjustment,Stok opname,

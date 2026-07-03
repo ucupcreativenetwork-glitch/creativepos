@@ -12,6 +12,7 @@ import type {
   RawMaterialPayload,
   RawMaterialStockPayload,
   StockAlert,
+  StockImportResult,
   StockMovement,
   StockMovementPayload,
   Warehouse,
@@ -133,6 +134,25 @@ export async function stockOut(payload: StockMovementPayload): Promise<void> {
 
 export async function stockAdjustment(payload: StockMovementPayload): Promise<void> {
   await apiClient.post("/inventory/stocks/adjustment", payload);
+}
+
+export async function importStock(
+  file: File,
+  warehouseId?: number,
+): Promise<StockImportResult> {
+  const formData = new FormData();
+  formData.append("file", file);
+  if (warehouseId) {
+    formData.append("warehouse_id", String(warehouseId));
+  }
+
+  const { data } = await apiClient.post<ApiResponse<StockImportResult>>(
+    "/inventory/stocks/import",
+    formData,
+    { headers: { "Content-Type": "multipart/form-data" } },
+  );
+
+  return data.data;
 }
 
 export async function getRawMaterials(params?: {

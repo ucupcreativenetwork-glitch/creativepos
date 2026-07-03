@@ -143,6 +143,12 @@ export interface StockMovementPayload {
   notes?: string;
 }
 
+export interface StockImportResult {
+  processed: number;
+  skipped: number;
+  errors: string[];
+}
+
 export interface RawMaterialPayload {
   name: string;
   unit: RawMaterialUnit;
