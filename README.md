@@ -74,10 +74,14 @@ powershell -ExecutionPolicy Bypass -File install.ps1 -AppHost 10.110.1.15
 cd /opt/creativepos && sudo bash update.sh
 ```
 
-| Setelah install | URL |
-|-----------------|-----|
+| Setelah install | URL / Akun |
+|-----------------|------------|
+| Login | `http://IP-SERVER/login` |
+| Admin Toko | `admin@creativepos.local` / `Admin123!` |
+| Super Admin | `superadmin@creativepos.local` / `SuperAdmin123!` |
 | Web POS | `http://IP-SERVER/pos` |
-| Daftar akun | `http://IP-SERVER/register` |
+| Platform | `http://IP-SERVER/platform` |
+| Daftar bisnis baru | `http://IP-SERVER/register` |
 | APK mobile | `http://IP-SERVER/api/v1/mobile/version?platform=android` |
 
 Panduan lengkap: [docs/CLIENT-INSTALL.md](docs/CLIENT-INSTALL.md) · [docs/TUTORIAL-LENGKAP.md](docs/TUTORIAL-LENGKAP.md) (setup → aktif → fitur → payment gateway)

@@ -1,8 +1,34 @@
 # CreativePOS — Tutorial Lengkap
 
-Panduan end-to-end: **pasang server → aktif dipakai → kelola fitur → konfigurasi pembayaran**.
+Panduan end-to-end: **pasang server → login → aktif dipakai → kelola fitur → konfigurasi pembayaran**.
 
 Repo: [github.com/ucupcreativenetwork-glitch/creativepos](https://github.com/ucupcreativenetwork-glitch/creativepos)
+
+---
+
+## Mulai Cepat (5 menit)
+
+```bash
+# 1. Install (Ubuntu, IP auto-detect)
+curl -fsSL https://raw.githubusercontent.com/ucupcreativenetwork-glitch/creativepos/main/bootstrap.sh | sudo bash
+
+# 2. Cek sehat
+curl http://IP-SERVER/api/v1/health
+
+# 3. Login di browser → http://IP-SERVER/login
+```
+
+| Akun | Email | Password | Untuk apa |
+|------|-------|----------|-----------|
+| Admin Toko | `admin@creativepos.local` | `Admin123!` | Operasional harian (Manager) |
+| Super Admin | `superadmin@creativepos.local` | `SuperAdmin123!` | Semua fitur + `/platform` |
+
+Setelah login Admin → buka `/pos` → transaksi pertama.  
+Setelah login Super Admin → buka `/platform` untuk kelola tenant & APK.
+
+Tenant demo **Toko Demo CreativePOS** sudah berisi 4 produk siap jual.
+
+> **Production:** ganti password default (lihat [bagian 11.1](#111-akun-default-otomatis-saat-install)).
 
 ---
 
@@ -23,6 +49,8 @@ Repo: [github.com/ucupcreativenetwork-glitch/creativepos](https://github.com/ucu
 13. [Build APK dari source](#13-build-apk-dari-source)
 14. [Import produk massal (CSV)](#14-import-produk-massal-csv)
 15. [Troubleshooting](#15-troubleshooting)
+16. [Skrip penting & variabel environment](#16-skrip-penting--variabel-environment)
+17. [Matriks role & permission](#17-matriks-role--permission)
 
 ---
 
@@ -112,12 +140,17 @@ powershell -ExecutionPolicy Bypass -File install.ps1
 ### 2.4 Apa yang dilakukan skrip install?
 
 1. Install Docker + Git (jika belum ada)
-2. **Auto-detect IP/domain** dari:
-   - argumen CLI → `docker/.env` → `backend/.env` → IP LAN → hostname
+2. **Auto-detect IP/domain** (`scripts/lib/resolve-app-host.sh`):
+   - argumen CLI → `docker/.env` → `backend/.env` → IP LAN (default route) → hostname
 3. Generate `docker/.env`, `backend/.env`, `frontend/.env.local`
-4. Build & jalankan container (MySQL, Redis, backend, frontend, nginx)
-5. Migrasi database + seed data demo (bisa dilewati: `SKIP_SEED=1`)
-6. Unduh APK dari GitHub Release (jika tersedia)
+4. Build & jalankan container (MySQL, Redis, backend, frontend, nginx, reverb, horizon)
+5. Migrasi database + seed (`SKIP_SEED=1` untuk lewati):
+   - Paket langganan (Starter / Business / Enterprise)
+   - **Akun default** Admin + Super Admin (`DefaultAccountsSeeder`)
+   - Tenant demo + 4 produk + outlet + gudang
+   - Data demo opsional (CRM, QR menu, reservasi, billing)
+6. Unduh APK dari GitHub Release (jika tersedia, `SKIP_APK=1` untuk lewati)
+7. Tampilkan ringkasan URL + kredensial login (`scripts/post-install.sh`)
 
 ### 2.5 Verifikasi server aktif
 
@@ -168,13 +201,29 @@ powershell -ExecutionPolicy Bypass -File scripts\reconfigure-host.ps1
 
 ## 3. Aktivasi pertama (web & kasir)
 
-### 3.1 Buat akun bisnis (Owner)
+### 3.1 Login dengan akun default (disarankan)
 
-1. Buka `http://IP-SERVER/register` dari PC kasir
-2. Isi nama bisnis, email, password
-3. Login → Anda masuk sebagai **Owner**
+1. Buka `http://IP-SERVER/login`
+2. Pilih salah satu:
 
-### 3.2 Wizard onboarding (otomatis muncul)
+| Login sebagai | Email | Password | Langkah berikutnya |
+|---------------|-------|----------|-------------------|
+| Admin Toko | `admin@creativepos.local` | `Admin123!` | `/pos` → jual produk demo |
+| Super Admin | `superadmin@creativepos.local` | `SuperAdmin123!` | `/platform` → kelola sistem |
+
+3. Tenant demo: **Toko Demo CreativePOS** — sudah ada outlet, 4 produk, metode bayar Cash/QRIS/Transfer/GoPay
+
+### 3.2 Buat bisnis baru (Owner) — opsional
+
+Jika ingin bisnis terpisah dari demo:
+
+1. Buka `http://IP-SERVER/register`
+2. Isi nama bisnis, nama owner, email, password
+3. Login → Anda menjadi **Owner** (akses penuh tenant sendiri)
+
+### 3.3 Wizard onboarding (bisnis baru)
+
+Muncul otomatis setelah register (tidak untuk akun demo — demo sudah `setup_completed`):
 
 Ikuti langkah:
 
@@ -186,7 +235,7 @@ Ikuti langkah:
 | Metode Pembayaran | Centang Cash, Transfer, QRIS, dll. |
 | Undang Staff | Email kasir (opsional) |
 
-### 3.3 Pengaturan lanjutan (menu **Pengaturan**)
+### 3.4 Pengaturan lanjutan (menu **Pengaturan**)
 
 | Tab | Fungsi |
 |-----|--------|
@@ -198,19 +247,21 @@ Ikuti langkah:
 | **Langganan** | Invoice SaaS (jika dipakai) |
 | **Integrasi** | Email SMTP, WhatsApp |
 
-### 3.4 Mulai transaksi POS
+### 3.5 Mulai transaksi POS
 
 1. Buka `http://IP-SERVER/pos`
 2. Pilih outlet (jika lebih dari satu)
 3. Tambah produk ke keranjang → **Bayar** → pilih metode → konfirmasi
 4. Struk tercetak / bisa dicetak dari browser
 
-### 3.5 Checklist "server aktif"
+### 3.6 Checklist "server aktif"
 
-- [ ] Health check API OK
-- [ ] Bisa login dashboard
-- [ ] Minimal 1 outlet & 1 produk
+- [ ] Health check API OK (`/api/v1/health`)
+- [ ] Login `admin@creativepos.local` berhasil
+- [ ] Dashboard menampilkan tenant **Toko Demo CreativePOS**
+- [ ] Produk demo tampil di `/pos` (Nasi Goreng, Es Teh, dll.)
 - [ ] Transaksi POS pertama berhasil
+- [ ] Login `superadmin@creativepos.local` → `/platform` terbuka
 - [ ] Tablet/HP di WiFi yang sama bisa buka `http://IP-SERVER/pos`
 - [ ] (Opsional) APK terpasang di tablet
 
@@ -546,6 +597,14 @@ Alur menambah gateway baru (mis. Duitku):
 cd /opt/creativepos && sudo bash update.sh
 ```
 
+Setelah update, jika akun default belum ada:
+
+```bash
+cd /opt/creativepos/docker
+docker compose -f docker-compose.client.yml exec -T backend \
+  php artisan db:seed --class=DefaultAccountsSeeder --force
+```
+
 ### Perintah operasional
 
 ```bash
@@ -860,29 +919,48 @@ CreativePOS mendukung printer **ESC/POS 58mm & 80mm**.
 
 ### 11.1 Akun default (otomatis saat install)
 
-Setelah `install.sh` / `migrate --seed`, dua akun siap dipakai:
+Seeder `DefaultAccountsSeeder` berjalan saat `migrate --seed` (kecuali `SKIP_DEFAULT_ACCOUNTS=1`).
 
-| Akun | Email | Password | Akses |
-|------|-------|----------|-------|
-| **Admin Toko** | `admin@creativepos.local` | `Admin123!` | Beberapa fitur (role **Manager**) |
-| **Super Admin** | `superadmin@creativepos.local` | `SuperAdmin123!` | **Semua fitur** + panel `/platform` |
+| Akun | Email | Password | Role | Akses |
+|------|-------|----------|------|-------|
+| **Admin Toko** | `admin@creativepos.local` | `Admin123!` | Manager | Beberapa fitur operasional |
+| **Super Admin** | `superadmin@creativepos.local` | `SuperAdmin123!` | super-admin | **Semua fitur** + `/platform` |
 
-**Admin Toko** (`manager`) — bisa:
+**Yang dibuat sekaligus:**
 
-- Dashboard, POS, inventori (lihat/tambah/edit), laporan, CRM, delivery, reservasi
-- Pengaturan (lihat, terbatas)
+| Item | Nilai |
+|------|-------|
+| Tenant demo | Toko Demo CreativePOS (`slug: toko-demo`) |
+| Paket | Enterprise (semua modul aktif) |
+| Outlet | Outlet Demo |
+| Produk | 4 item (Nasi Goreng, Es Teh, Ayam Bakar, Kopi Susu) |
+| Stok | 50 unit per produk |
 
-**Tidak bisa:** hapus produk, kelola semua user, ubah outlet, void/refund penuh seperti owner.
+**Admin Toko (Manager)** — bisa: dashboard, POS, inventori (lihat/tambah/edit), laporan, CRM, delivery, reservasi, pengaturan terbatas.
 
-**Super Admin** — bisa:
+**Tidak bisa:** hapus produk, kelola semua user/outlet, void/refund penuh seperti Owner.
 
-- Semua menu (POS, inventori, laporan, CRM, delivery, dll.)
-- Panel **Platform** (`/platform`) — kelola tenant, upload APK, MRR
-- Bypass permission di backend
+**Super Admin** — bisa: semua menu tenant + panel `/platform` (tenant, APK, MRR). Permission di-bypass di backend & frontend.
 
-> **Production:** wajib ganti password! Set env sebelum install:
-> `CREATIVEPOS_DEMO_ADMIN_PASSWORD`, `CREATIVEPOS_SUPER_ADMIN_PASSWORD`
-> atau `SKIP_DEFAULT_ACCOUNTS=1` untuk lewati akun demo.
+**Kustomisasi password** — set di `backend/.env` sebelum install:
+
+```env
+CREATIVEPOS_DEMO_ADMIN_EMAIL=admin@creativepos.local
+CREATIVEPOS_DEMO_ADMIN_PASSWORD=PasswordAdminAnda
+CREATIVEPOS_SUPER_ADMIN_EMAIL=superadmin@creativepos.local
+CREATIVEPOS_SUPER_ADMIN_PASSWORD=PasswordSuperAnda
+SKIP_DEFAULT_ACCOUNTS=1
+```
+
+(`SKIP_DEFAULT_ACCOUNTS=1` = tidak buat akun demo)
+
+**Server yang sudah terinstall** (tambah akun belakangan):
+
+```bash
+cd /opt/creativepos/docker
+docker compose -f docker-compose.client.yml exec -T backend \
+  php artisan db:seed --class=DefaultAccountsSeeder --force
+```
 
 Login: `http://IP-SERVER/login`
 
@@ -894,67 +972,60 @@ Untuk bisnis kedua / mandiri tanpa akun demo:
 2. Isi nama bisnis, nama owner, email, password
 3. Login → Anda menjadi **Owner** tenant baru
 
-### 11.3 Data demo setelah register
+### 11.3 Data demo tambahan (opsional)
 
-Seeder demo (`DashboardDemoSeeder`, dll.) berjalan saat **install**, sebelum ada tenant. Jadi pada instalasi normal **produk demo tidak otomatis muncul**.
-
-Untuk mengisi data contoh setelah register (opsional):
+Instalasi default sudah punya tenant + produk dari `DefaultAccountsSeeder`. Untuk data operasional lengkap (reservasi, delivery, CRM, invoice):
 
 ```bash
 cd /opt/creativepos/docker
 
-# Lihat tenant_id (biasanya 1 untuk bisnis pertama)
+# tenant demo biasanya id=1 (slug: toko-demo)
 docker compose -f docker-compose.client.yml exec -T mysql \
-  mysql -u creativepos -p"${DB_PASSWORD}" creativepos \
-  -e "SELECT id, name, slug FROM tenants;"
+  mysql -u creativepos -p creativepos -e "SELECT id, name, slug FROM tenants;"
 
-# (Disarankan) Import produk dulu agar demo delivery punya item — lihat bagian 14
-
-# Muat data demo operasional (reservasi, delivery, driver, QR menu, CRM, invoice)
-docker compose -f docker-compose.client.yml exec -T backend php artisan db:seed --class=OperationsDemoSeeder
-docker compose -f docker-compose.client.yml exec -T backend php artisan db:seed --class=QrMenuSeeder
-docker compose -f docker-compose.client.yml exec -T backend php artisan db:seed --class=CrmDemoSeeder
-docker compose -f docker-compose.client.yml exec -T backend php artisan db:seed --class=BillingDemoSeeder
+docker compose -f docker-compose.client.yml exec -T backend php artisan db:seed --class=OperationsDemoSeeder --force
+docker compose -f docker-compose.client.yml exec -T backend php artisan db:seed --class=QrMenuSeeder --force
+docker compose -f docker-compose.client.yml exec -T backend php artisan db:seed --class=CrmDemoSeeder --force
+docker compose -f docker-compose.client.yml exec -T backend php artisan db:seed --class=BillingDemoSeeder --force
 ```
 
-**Catatan penting:**
+**Bisnis baru via `/register`:**
 
-- `DashboardDemoSeeder` (produk + transaksi demo) **tidak jalan** setelah `/register` karena outlet sudah dibuat otomatis.
-- Untuk produk massal setelah register → gunakan **import CSV** (bagian 14) atau tambah manual di **Inventori**.
-- Seeder demo bersifat **idempotent** — aman dijalankan ulang; data yang sudah ada dilewati.
+- Produk tidak otomatis terisi — gunakan **import CSV** (bagian 14) atau **Inventori → Tambah Produk**
+- `DashboardDemoSeeder` tidak jalan jika outlet sudah ada (kondisi setelah register)
 
-### 11.4 Akun driver demo (jika OperationsDemoSeeder dijalankan)
+Semua seeder **idempotent** — aman dijalankan ulang.
+
+### 11.4 Akun driver demo (tenant `toko-demo`)
+
+Setelah `OperationsDemoSeeder`:
 
 | Email | Password | Peran |
 |-------|----------|-------|
-| `driver1@{slug-bisnis}.demo` | `password` | Driver |
-| `driver2@{slug-bisnis}.demo` | `password` | Driver |
+| `driver1@toko-demo.demo` | `password` | Driver |
+| `driver2@toko-demo.demo` | `password` | Driver |
 
-Ganti `{slug-bisnis}` dengan slug tenant (mis. bisnis "Warung Makan" → `warung-makan`).
+Untuk tenant lain: `driver1@{slug}.demo` (ganti `{slug}` dengan slug bisnis).
 
 ### 11.5 Buat / reset Super Admin manual
-
-Super Admin mengelola seluruh tenant, paket, dan upload APK.
 
 ```bash
 cd /opt/creativepos/docker
 
 docker compose -f docker-compose.client.yml exec -T backend \
-  php scripts/create-super-admin.php admin@creativepos.local "PasswordKuat123!"
+  php scripts/create-super-admin.php superadmin@creativepos.local "PasswordKuat123!"
 ```
 
 | Field | Nilai |
 |-------|-------|
-| Email | `admin@creativepos.local` (ganti sesuai kebutuhan) |
+| Email | bebas (mis. `superadmin@creativepos.local`) |
 | Password | minimal 8 karakter |
 
-Login:
+Skrip ini membuat/update user `is_super_admin=true` dan role `super-admin`.
 
-1. Buka `http://IP-SERVER/login`
-2. Masuk dengan email/password Super Admin
-3. Buka `http://IP-SERVER/platform`
+Login → `http://IP-SERVER/login` → buka `http://IP-SERVER/platform`.
 
-> Super Admin **bukan** tenant owner — `tenant_id` kosong, role `super-admin`.
+> Super Admin terhubung ke tenant demo agar API tenant berjalan; permission tetap bypass penuh.
 
 ---
 
@@ -1126,10 +1197,12 @@ cd docker
 docker compose -f docker-compose.client.yml exec -T mysql \
   mysql -u creativepos -p creativepos -e "SELECT id, name FROM tenants;"
 
-# 3. Jalankan import (tenant_id=1 untuk bisnis pertama)
+# 3. Jalankan import (tenant_id=1 = toko-demo, atau id tenant Anda)
 docker compose -f docker-compose.client.yml exec -T backend \
   php scripts/import-products-csv.php /var/www/html/storage/app/import/products.csv 1
 ```
+
+Import ke tenant demo **tidak menimpa** SKU yang sudah ada (`DEMO-NGS-001`, dll.) — baris duplikat dilewati. Gunakan SKU baru di CSV.
 
 Output sukses:
 
@@ -1174,8 +1247,75 @@ Dilewati : 0
 | HTTPS certificate error | Periksa mount `/etc/letsencrypt`; renew certbot |
 | Printer BT gagal | Pair di Android; izin Bluetooth; lebar kertas 58/80mm |
 | Import CSV gagal | Header wajib: name,sku,base_price; encoding UTF-8 |
-| Super Admin 403 | Jalankan `create-super-admin.php`; login ulang |
+| Super Admin 403 | `php artisan db:seed --class=DefaultAccountsSeeder --force` atau `create-super-admin.php` |
+| Akun default tidak ada | `SKIP_SEED=1` dipakai saat install — jalankan seeder manual |
+| Login admin gagal | Pastikan seed selesai; cek `users` di database |
 | Update gagal | `git status` — backup `.env`; resolve conflict dulu |
+
+---
+
+## 16. Skrip penting & variabel environment
+
+### Skrip instalasi & operasional
+
+| Skrip | Platform | Fungsi |
+|-------|----------|--------|
+| `bootstrap.sh` / `bootstrap.ps1` | Linux / Win | Server kosong → install penuh |
+| `install.sh` / `install.ps1` | Linux / Win | Install dari clone GitHub |
+| `update.sh` / `update.ps1` | Linux / Win | Pull + rebuild + migrate |
+| `scripts/install-client.sh` | Linux | Generate env + Docker up + migrate |
+| `scripts/install-client.ps1` | Windows | Sama untuk Windows |
+| `scripts/reconfigure-host.sh` | Linux | Ubah IP/domain (auto-detect) |
+| `scripts/reconfigure-host.ps1` | Windows | Sama untuk Windows |
+| `scripts/lib/resolve-app-host.sh` | Linux | Helper deteksi host |
+| `scripts/lib/Resolve-AppHost.ps1` | Windows | Helper deteksi host |
+| `scripts/post-install.sh` | Linux | Ringkasan URL + akun default |
+| `scripts/install-mobile-apk.sh` | Linux | Unduh APK dari GitHub Release |
+| `scripts/build-flutter-android.ps1` | Windows | Build APK Flutter |
+
+### Skrip backend (jalankan di dalam container)
+
+| Skrip | Fungsi |
+|-------|--------|
+| `backend/scripts/create-super-admin.php` | Buat/reset Super Admin |
+| `backend/scripts/import-products-csv.php` | Import produk massal CSV |
+| `backend/scripts/publish-apk.php` | Publish APK ke server |
+
+### Variabel environment instalasi
+
+| Variabel | Default | Keterangan |
+|----------|---------|------------|
+| `SKIP_SEED` | `0` | `1` = lewati migrate --seed |
+| `SKIP_APK` | `0` | `1` = lewati unduh APK |
+| `SKIP_PREREQS` | `0` | `1` = lewati install Docker/Git |
+| `SKIP_DEFAULT_ACCOUNTS` | `0` | `1` = tanpa akun demo |
+| `CREATIVEPOS_DEMO_ADMIN_EMAIL` | `admin@creativepos.local` | Email Admin Toko |
+| `CREATIVEPOS_DEMO_ADMIN_PASSWORD` | `Admin123!` | Password Admin |
+| `CREATIVEPOS_SUPER_ADMIN_EMAIL` | `superadmin@creativepos.local` | Email Super Admin |
+| `CREATIVEPOS_SUPER_ADMIN_PASSWORD` | `SuperAdmin123!` | Password Super Admin |
+| `CREATIVEPOS_NO_PROMPT` | `0` | `1` = tidak prompt IP saat install |
+| `GITHUB_TOKEN` | — | PAT untuk repo private |
+| `INSTALL_DIR` | `/opt/creativepos` | Folder instalasi (bootstrap) |
+
+---
+
+## 17. Matriks role & permission
+
+| Fitur | Cashier | Manager (Admin) | Owner | Super Admin |
+|-------|---------|-----------------|-------|-------------|
+| POS jual | ✅ | ✅ | ✅ | ✅ |
+| Void / Refund | ❌ | ✅ | ✅ | ✅ |
+| Inventori hapus | ❌ | ❌ | ✅ | ✅ |
+| Kelola user | ❌ | ❌ | ✅ | ✅ |
+| Kelola outlet | ❌ | ❌ | ✅ | ✅ |
+| Laporan export | ❌ | ✅ | ✅ | ✅ |
+| Pengaturan penuh | ❌ | terbatas | ✅ | ✅ |
+| Panel `/platform` | ❌ | ❌ | ❌ | ✅ |
+| Semua tenant | ❌ | ❌ | ❌ | ✅ |
+
+Role di-assign otomatis: Admin demo = **Manager**, register baru = **Owner**, Super Admin = **super-admin**.
+
+Tambah staff: **Pengaturan → Pengguna → Undang** (Owner/Manager).
 
 ---
 

@@ -129,14 +129,27 @@ sudo bash scripts/install-client.sh 192.168.1.50
 
 | Akses | URL |
 |-------|-----|
+| Login | `http://IP-SERVER/login` |
 | Dashboard | `http://IP-SERVER/` |
 | POS | `http://IP-SERVER/pos` |
-| Daftar akun | `http://IP-SERVER/register` |
+| Platform (Super Admin) | `http://IP-SERVER/platform` |
+| Daftar bisnis baru | `http://IP-SERVER/register` |
 
-1. Buka dari PC kasir: `http://IP-SERVER/register`
-2. Buat akun bisnis pertama (owner)
-3. Atur outlet, produk, metode bayar di **Pengaturan**
-4. Tablet/Android: pasang APK atau buka browser → arahkan ke IP server
+### Akun default (otomatis)
+
+| Akun | Email | Password |
+|------|-------|----------|
+| Admin Toko | `admin@creativepos.local` | `Admin123!` |
+| Super Admin | `superadmin@creativepos.local` | `SuperAdmin123!` |
+
+Tenant demo **Toko Demo CreativePOS** sudah berisi outlet + 4 produk. Ganti password di production.
+
+1. Login `admin@creativepos.local` → buka `/pos` → transaksi pertama
+2. Login `superadmin@creativepos.local` → buka `/platform`
+3. Bisnis baru: `http://IP-SERVER/register`
+4. Tablet/Android: pasang APK → arahkan ke `http://IP-SERVER`
+
+Detail: [TUTORIAL-LENGKAP.md](./TUTORIAL-LENGKAP.md)
 
 ## Arsitektur Client
 
